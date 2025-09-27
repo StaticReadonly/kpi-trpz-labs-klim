@@ -13,6 +13,8 @@ namespace BookingClinic.Data.Configs
                 .HasValue<Doctor>("Doctor")
                 .HasValue<Admin>("Admin");
 
+            builder.HasIndex(u => u.Email).IsUnique();
+            builder.HasIndex(u => u.Phone).IsUnique();
         }
     }
 }

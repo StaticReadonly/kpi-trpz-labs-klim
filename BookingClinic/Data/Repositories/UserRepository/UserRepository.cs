@@ -1,6 +1,7 @@
 ﻿using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Entities;
 using BookingClinic.Data.Repositories.Abstraction;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookingClinic.Data.Repositories.UserRepository
 {
@@ -10,5 +11,8 @@ namespace BookingClinic.Data.Repositories.UserRepository
             : base(context)
         {
         }
+
+        public IEnumerable<Doctor> GetSearchDoctors() => 
+            _context.Set<Doctor>().Include(d => d.Speciality).Include(d => d.Clinic).ToList();
     }
 }

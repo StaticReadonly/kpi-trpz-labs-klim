@@ -1,0 +1,95 @@
+﻿@using BookingClinic.Services.Data.Doctor
+@model SearchDoctorDto;
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Doctors";
+    var data = (IEnumerable<SearchDoctorResDto>)ViewData["Doctors"];
+    var pages = (IEnumerable<int>)ViewData["Pages"];
+    var currentPage = (int)ViewData["Page"];
+    var ordering = ViewData["Ordering"];
+    var specialities = (IEnumerable<string>)ViewData["Specialities"];
+    var clinics = (IEnumerable<string>)ViewData["Clinics"];
+    var queryString = Context.Request.QueryString.Value;
+
+    if (!string.IsNullOrEmpty(queryString))
+    {
+        var vals = queryString.Split('&');
+        var filterVals = vals.Where(val => !val.Contains("page="));
+        queryString = string.Join('&', filterVals);
+    }
+}
+
+<form class="row g-2 align-items-center mb-4" method="get">
+    <div class="col-md-4">
+        <input type="text" class="form-control" asp-for="Query" placeholder="Name and surname" />
+    </div>
+    <div class="col-md-2">
+        <select class="form-select" asp-for="Speciality">
+            <option value="">Speciality</option>
+            @foreach (var s in specialities)
+            {
+                <option value="@s">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select class="form-select" asp-for="Clinic">
+            <option value="">Clinic</option>
+            @foreach (var c in clinics)
+            {
+                <option value="@c">@c</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">
+            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/search.svg" alt="Search" width="20" height="20" />
+        </button>
+    </div>
+</form>
+<div class="row row-cols-1 gy-4">
+    @foreach (var doc in data)
+    {
+        <div class="col">
+            <div class="card p-3 flex-row align-items-center">
+                <div class="me-4">
+                    <img src="@(doc.ProfilePicture == null ? Url.Content("~/profiles/default/defaultUser.png") : Url.Content("~/profiles/default/" + doc.ProfilePicture))"
+                         alt="Doctor"
+                         class="rounded-circle"
+                         style="width: 96px; height: 96px; object-fit: cover;" />
+                </div>
+                <div class="flex-grow-1">
+                    <div><strong>Name:</strong> @doc.Name</div>
+                    <div><strong>Surname:</strong> @doc.Surname</div>
+                    <div><strong>Clinic:</strong> @doc.Clinic</div>
+                    <div><strong>Speciality:</strong> @doc.Speciality</div>
+                    <a class="btn btn-outline-primary mt-2" href="~/doctor/@doc.Id">Go to doctor</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        @foreach (var p in pages)
+        {
+            var href = string.Empty;
+
+            if (string.IsNullOrEmpty(queryString))
+            {
+                href = $"./doctor?page={p}";
+            }
+            else
+            {
+                href = $"./doctor{queryString}&page={p}";
+            }
+            if (ordering != null)
+            {
+                href += $"&ordering={ordering}";
+            }
+            <li class="page-item @(p == currentPage ? "active" : "")">
+                <a class="page-link" href="@href">@p</a>
+            </li>
+        }
+    </ul>
+</nav>

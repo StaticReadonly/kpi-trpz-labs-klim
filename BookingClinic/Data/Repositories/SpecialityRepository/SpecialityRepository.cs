@@ -10,5 +10,8 @@ namespace BookingClinic.Data.Repositories.SpecialityRepository
             : base(context)
         {
         }
+
+        public Speciality? GetSpecialityByName(string name) => 
+            _context.Set<Speciality>().FirstOrDefault(s => s.Name == name);
     }
 }

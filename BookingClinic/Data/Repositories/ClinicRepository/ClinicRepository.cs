@@ -11,5 +11,8 @@ namespace BookingClinic.Data.Repositories.ClinicRepository
         {
 
         }
+
+        public Clinic? GetClinicByName(string name) =>
+            _context.Set<Clinic>().FirstOrDefault(c => c.Name == name);
     }
 }

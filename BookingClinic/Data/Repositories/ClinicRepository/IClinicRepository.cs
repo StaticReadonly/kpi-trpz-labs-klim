@@ -5,5 +5,6 @@ namespace BookingClinic.Data.Repositories.ClinicRepository
 {
     public interface IClinicRepository : IRepository<Clinic, Guid>
     {
+        Clinic? GetClinicByName(string name);
     }
 }

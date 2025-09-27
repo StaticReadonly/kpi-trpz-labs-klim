@@ -1,5 +1,9 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
+using BookingClinic.Services.Extensions;
+using BookingClinic.Services.Helpers.PaginationHelper;
+using BookingClinic.Services.Mapper;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -28,12 +32,21 @@ namespace BookingClinic
             });
 
             services.AddAppRepositories();
+            services.AddAppServices();
 
+            services.AddScoped(typeof(IPaginationHelper<>), typeof(PaginationHelper<>));
+
+            services.AddMapster();
             services.AddAuthentication();
+            services.AddAuthorization();
+
+            MapperConfigs.RegisterMappings();
 
             var app = builder.Build();
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();
