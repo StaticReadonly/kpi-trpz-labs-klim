@@ -14,10 +14,13 @@
         public static ServiceError UnexpectedError() =>
             new("Unexpected error", "Some unexpected error happened");
 
-        public static ServiceError UserDoesNotExist() => 
-            new("User does not exist", "Specified user was not found");
+        public static ServiceError UserAlreadyExists() => 
+            new("User already exists", "User already exists");
 
         public static ServiceError InvalidCredentials() =>
             new("Invalid credentials", "Email or password incorrect");
+
+        public static ServiceError Unauthorized() =>
+            new("User unauthorized", "User is unauthorized");
     }
 }

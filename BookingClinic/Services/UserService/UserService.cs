@@ -38,6 +38,18 @@ namespace BookingClinic.Services.UserService
             return Convert.ToBase64String(hash);
         }
 
+        private ClaimsPrincipal CreateClaimsPrincipal(UserBase user)
+        {
+            var claims = new Claim[]
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Role, user.Role)
+            };
+
+            var identity = new ClaimsIdentity(claims, "Cookie");
+            return new ClaimsPrincipal(identity);
+        }
+
         public ServiceResult<IEnumerable<SearchDoctorResDto>> SearchDoctors(SearchDoctorDto dto)
         {
             try
@@ -123,15 +135,66 @@ namespace BookingClinic.Services.UserService
                     new List<ServiceError>() { ServiceError.InvalidCredentials() });
             }
 
-            var claims = new Claim[]
+            var claimsPrincipal = CreateClaimsPrincipal(user);
+
+            return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
+        }
+
+        public async Task<ServiceResult<ClaimsPrincipal>> RegisterUser(RegisterUserDto dto)
+        {
+            UserBase? existingUser = _userRepository.GetUserByEmail(dto.Email);
+
+            if (existingUser != null)
             {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Role, user.Role)
+                return ServiceResult<ClaimsPrincipal>.Failure(
+                    new List<ServiceError>() { ServiceError.UserAlreadyExists() });
+            }
+
+            Patient newUser = new()
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Surname = dto.Surname,
+                Email = dto.Email
             };
 
-            var identity = new ClaimsIdentity(claims, "Cookie");
+            var passwordHash = GetPasswordHash(newUser, dto.Password);
+            newUser.PasswordHash = passwordHash;
 
-            return ServiceResult<ClaimsPrincipal>.Success(new ClaimsPrincipal(identity));
+            _userRepository.AddEntity(newUser);
+
+            try
+            {
+                await _userRepository.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return ServiceResult<ClaimsPrincipal>.Failure(
+                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+            }
+
+            var claimsPrincipal = CreateClaimsPrincipal(newUser);
+
+            return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
+        }
+
+        public ServiceResult<UserPageDataDto> GetUserData(ClaimsPrincipal userPrincipal)
+        {
+            var idClaim = userPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+
+            if (idClaim == null)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(
+                    new List<ServiceError>() { ServiceError.Unauthorized() });
+            }
+
+            Guid id = Guid.Parse(idClaim.Value);
+
+            var user = _userRepository.GetById(id);
+
+            var result = user.Adapt<UserPageDataDto>();
+
+            return ServiceResult<UserPageDataDto>.Success(result);
         }
     }
 }

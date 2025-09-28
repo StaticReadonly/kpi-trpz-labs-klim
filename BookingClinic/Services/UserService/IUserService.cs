@@ -8,5 +8,7 @@ namespace BookingClinic.Services.UserService
     {
         ServiceResult<IEnumerable<SearchDoctorResDto>> SearchDoctors(SearchDoctorDto dto);
         ServiceResult<ClaimsPrincipal> LoginUser(LoginUserDto dto);
+        Task<ServiceResult<ClaimsPrincipal>> RegisterUser(RegisterUserDto dto);
+        ServiceResult<UserPageDataDto> GetUserData(ClaimsPrincipal userPrincipal);
     }
 }

@@ -13,20 +13,40 @@ namespace BookingClinic.Controllers
     {
         private readonly IUserService _userService;
         private readonly IValidator<LoginUserDto> _loginValidator;
+        private readonly IValidator<RegisterUserDto> _registerValidator;
 
         public UserController(
-            IUserService userService, 
-            IValidator<LoginUserDto> loginValidator)
+            IUserService userService,
+            IValidator<LoginUserDto> loginValidator,
+            IValidator<RegisterUserDto> registerValidator)
         {
             _userService = userService;
             _loginValidator = loginValidator;
+            _registerValidator = registerValidator;
         }
 
         [HttpGet]
         [Authorize("AuthUser")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var userData = _userService.GetUserData(User);
+
+            if (userData.IsSuccess)
+            {
+                return View(userData.Result);
+            }
+            else
+            {
+                await Logout();
+                return LoginPage();
+            }
+        }
+
+        [HttpPost]
+        [Authorize("AuthUser")]
+        public IActionResult UpdateUser([FromForm] RegisterUserDto newData)
+        {
+            return RedirectToAction("Index");
         }
 
         [HttpGet("login")]
@@ -66,6 +86,37 @@ namespace BookingClinic.Controllers
             return View();
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterPost([FromForm] RegisterUserDto dto)
+        {
+            var validationResult = _registerValidator.Validate(dto);
+
+            if (dto.Password != dto.ConfirmPassword)
+            {
+                validationResult.Errors.Add(new("ConfirmPassword", "Passwords must match"));
+            }
+
+            if (!validationResult.IsValid)
+            {
+                validationResult.AddToModelState(ModelState);
+                return View("RegisterPage", dto);
+            }
+
+            var res = await _userService.RegisterUser(dto);
+
+            if (res.IsSuccess)
+            {
+                await HttpContext.SignInAsync(res.Result);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ViewData["Errors"] = res.Errors;
+                return View("RegisterPage", dto);
+            }
+        }
+
+
         [HttpPost("ppc")]
         [Authorize("AuthUser")]
         public IActionResult ProfilePicture([FromForm] IFormFile image)
@@ -75,8 +126,9 @@ namespace BookingClinic.Controllers
 
         [HttpPost("logout")]
         [Authorize("AuthUser")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Main");
         }
     }
