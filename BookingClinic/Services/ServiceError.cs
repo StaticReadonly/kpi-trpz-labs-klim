@@ -16,5 +16,8 @@
 
         public static ServiceError UserDoesNotExist() => 
             new("User does not exist", "Specified user was not found");
+
+        public static ServiceError InvalidCredentials() =>
+            new("Invalid credentials", "Email or password incorrect");
     }
 }

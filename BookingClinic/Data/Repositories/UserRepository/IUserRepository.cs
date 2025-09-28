@@ -6,5 +6,6 @@ namespace BookingClinic.Data.Repositories.UserRepository
     public interface IUserRepository : IRepository<UserBase, Guid>
     {
         IEnumerable<Doctor> GetSearchDoctors();
+        UserBase? GetUserByEmail(string email);
     }
 }

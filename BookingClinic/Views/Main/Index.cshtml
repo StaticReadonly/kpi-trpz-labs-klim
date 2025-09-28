@@ -2,6 +2,24 @@
     ViewData["Title"] = "Welcome";
 }
 
-<div>
-    Welcome to main page!
+<div class="container text-center my-5">
+    <h1 class="mb-5">Welcome to BookingClinic!</h1>
+
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a href="/user" class="btn btn-outline-primary btn-lg py-4">Your account</a>
+        <a href="/doctors" class="btn btn-outline-primary btn-lg py-4">Find doctors</a>
+
+        @if (User.IsInRole("Patient"))
+        {
+            <a href="/appointments" class="btn btn-outline-primary btn-lg py-4">My appointments</a>
+        }
+        @if (User.IsInRole("Doctor"))
+        {
+            <a href="/doctor/today" class="btn btn-outline-primary btn-lg py-4">Today's appointments</a>
+        }
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="/admin" class="btn btn-outline-primary btn-lg py-4">Manage</a>
+        }
+    </div>
 </div>

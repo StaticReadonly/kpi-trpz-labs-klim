@@ -3,6 +3,7 @@ using BookingClinic.Data.Extensions;
 using BookingClinic.Services.Extensions;
 using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Mapper;
+using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -37,9 +38,44 @@ namespace BookingClinic
             services.AddScoped(typeof(IPaginationHelper<>), typeof(PaginationHelper<>));
 
             services.AddMapster();
-            services.AddAuthentication();
-            services.AddAuthorization();
+            services.AddAuthentication()
+                .AddCookie("Cookie", cfg =>
+                {
+                    var cookieOpts = cfg.Cookie;
+                    cookieOpts.HttpOnly = true;
+                    cookieOpts.SameSite = SameSiteMode.Strict;
+                    cookieOpts.MaxAge = TimeSpan.FromDays(14);
+                    cookieOpts.Name = "Auth";
 
+                    cfg.LoginPath = "/user/login";
+                    cfg.LogoutPath = "/user/logout";
+                });
+
+
+            services.AddAuthorization(cfg =>
+            {
+                cfg.AddPolicy("AuthUser", cfg =>
+                {
+                    cfg.RequireAuthenticatedUser();
+                });
+                cfg.AddPolicy("Patients", cfg =>
+                {
+                    cfg.RequireAuthenticatedUser()
+                        .RequireRole("Patient");
+                });
+                cfg.AddPolicy("Doctors", cfg =>
+                {
+                    cfg.RequireAuthenticatedUser()
+                        .RequireRole("Doctor");
+                });
+                cfg.AddPolicy("Admin", cfg =>
+                {
+                    cfg.RequireAuthenticatedUser()
+                        .RequireRole("Admin");
+                });
+            });
+
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             MapperConfigs.RegisterMappings();
 
             var app = builder.Build();

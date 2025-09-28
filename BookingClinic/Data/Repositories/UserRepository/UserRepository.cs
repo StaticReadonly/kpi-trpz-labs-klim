@@ -14,5 +14,8 @@ namespace BookingClinic.Data.Repositories.UserRepository
 
         public IEnumerable<Doctor> GetSearchDoctors() => 
             _context.Set<Doctor>().Include(d => d.Speciality).Include(d => d.Clinic).ToList();
+
+        public UserBase? GetUserByEmail(string email) =>
+            _context.Set<UserBase>().FirstOrDefault(u => u.Email == email);
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BookingClinic.Controllers
 {
-    [Route("doctor")]
+    [Route("doctors")]
     public class DoctorController : Controller
     {
         private readonly IUserService _userService;
@@ -49,7 +49,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
-                var doctors = _paginationHelper.Paginate(res.Result, page, 2, out var pages);
+                var doctors = _paginationHelper.Paginate(res.Result, page, 5, out var pages);
 
                 ViewData["Pages"] = pages;
                 ViewData["Doctors"] = doctors;
