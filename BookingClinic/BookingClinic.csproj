@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
+    <Folder Include="Views\Appointment\" />
     <Folder Include="wwwroot\profiles\users\" />
   </ItemGroup>
 

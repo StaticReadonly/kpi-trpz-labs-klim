@@ -1,10 +1,13 @@
-﻿using BookingClinic.Services.Data.User;
+﻿using BookingClinic.Services;
+using BookingClinic.Services.Data.User;
 using BookingClinic.Services.UserService;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -14,45 +17,46 @@ namespace BookingClinic.Controllers
         private readonly IUserService _userService;
         private readonly IValidator<LoginUserDto> _loginValidator;
         private readonly IValidator<RegisterUserDto> _registerValidator;
+        private readonly IValidator<UserPageDataDto> _userDataValidator;
 
         public UserController(
             IUserService userService,
             IValidator<LoginUserDto> loginValidator,
-            IValidator<RegisterUserDto> registerValidator)
+            IValidator<RegisterUserDto> registerValidator,
+            IValidator<UserPageDataDto> userDataValidator)
         {
             _userService = userService;
             _loginValidator = loginValidator;
             _registerValidator = registerValidator;
+            _userDataValidator = userDataValidator;
         }
 
         [HttpGet]
         [Authorize("AuthUser")]
         public async Task<IActionResult> Index()
         {
+            if (TempData["Errors"] != null)
+            {
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+            }
+
             var userData = _userService.GetUserData(User);
 
             if (userData.IsSuccess)
             {
-                return View(userData.Result);
+                return View(userData.Result.Adapt<UserPageDataUpdateDto>());
             }
             else
             {
                 await Logout();
-                return LoginPage();
+                return LoginPage("/user");
             }
         }
 
-        [HttpPost]
-        [Authorize("AuthUser")]
-        public IActionResult UpdateUser([FromForm] RegisterUserDto newData)
-        {
-            return RedirectToAction("Index");
-        }
-
         [HttpGet("login")]
-        public IActionResult LoginPage()
+        public IActionResult LoginPage([FromQuery] string? returnUrl)
         {
-            return View();
+            return View(new LoginUserDto() {ReturnUrl = returnUrl });
         }
 
         [HttpPost("loginPost")]
@@ -71,6 +75,12 @@ namespace BookingClinic.Controllers
             if (res.IsSuccess)
             {
                 await HttpContext.SignInAsync(res.Result);
+
+                if (dto.ReturnUrl != null)
+                {
+                    return Redirect(dto.ReturnUrl);
+                }
+
                 return RedirectToAction("Index");
             }
             else
@@ -117,11 +127,46 @@ namespace BookingClinic.Controllers
         }
 
 
+        [HttpPost]
+        [Authorize("AuthUser")]
+        public async Task <IActionResult> UpdateUser([FromForm] UserPageDataUpdateDto newData)
+        {
+            var validationRes = _userDataValidator.Validate(newData);
+
+            if (!validationRes.IsValid)
+            {
+                validationRes.AddToModelState(ModelState);
+                return RedirectToAction("Index");
+            }
+
+            var res = await _userService.UpdateUser(newData, User);
+
+            if (res.IsSuccess)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                return RedirectToAction("Index");
+            }
+        }
+
         [HttpPost("ppc")]
         [Authorize("AuthUser")]
-        public IActionResult ProfilePicture([FromForm] IFormFile image)
+        public async Task<IActionResult> ProfilePicture([FromForm] IFormFile image)
         {
-            return RedirectToAction("Index");
+            var res = await _userService.UpdateUserPhoto(image, User);
+
+            if (res.IsSuccess)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ViewData["Errors"] = res.Errors;
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost("logout")]

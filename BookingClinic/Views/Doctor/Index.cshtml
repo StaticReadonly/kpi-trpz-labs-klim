@@ -63,7 +63,7 @@
                     <div><strong>Surname:</strong> @doc.Surname</div>
                     <div><strong>Clinic:</strong> @doc.Clinic</div>
                     <div><strong>Speciality:</strong> @doc.Speciality</div>
-                    <a class="btn btn-outline-primary mt-2" href="~/doctor/@doc.Id">Go to doctor</a>
+                    <a class="btn btn-outline-primary mt-2" href="~/doctors/@doc.Id">Go to doctor</a>
                 </div>
             </div>
         </div>
@@ -77,11 +77,11 @@
 
             if (string.IsNullOrEmpty(queryString))
             {
-                href = $"./doctor?page={p}";
+                href = $"./doctors?page={p}";
             }
             else
             {
-                href = $"./doctor{queryString}&page={p}";
+                href = $"./doctors{queryString}&page={p}";
             }
             if (ordering != null)
             {

@@ -1,0 +1,43 @@
+﻿@using BookingClinic.Services.Data.Review
+@model DoctorReviewsDto;
+@{
+    ViewData["Title"] = "Doctor Reviews";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center border rounded p-3 mb-4 bg-light">
+        <div class="d-flex align-items-center">
+            <img src="@(Model.ProfilePicture == null ? Url.Content("~/profiles/default/defaultUser.png") : Url.Content("~/profiles/default/" + Model.ProfilePicture))"
+                 class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Doctor avatar" />
+            <div>
+                <h4 class="mb-0">@Model.Name @Model.Surname</h4>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="fs-5"><strong>Rating:</strong> @Model.Rating</div>
+            <div class="fs-6 text-secondary">Total: @Model.Reviews.Count()</div>
+        </div>
+    </div>
+    <div class="row g-4">
+        @foreach (var rev in Model.Reviews)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="@(rev.ProfilePicture == null ? Url.Content("~/profiles/default/defaultUser.png") : Url.Content("~/profiles/default/" + rev.ProfilePicture))"
+                                 class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" alt="User avatar" />
+                            <div>
+                                <div class="fw-semibold">@rev.OwnerName</div>
+                                <div class="text-warning small">★ @rev.Rating</div>
+                            </div>
+                        </div>
+                        <div class="border-top pt-2 mt-2 text-break" style="min-height: 60px;">
+                            @rev.Text
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

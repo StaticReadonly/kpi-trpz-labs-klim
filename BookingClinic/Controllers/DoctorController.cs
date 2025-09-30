@@ -1,9 +1,15 @@
-﻿using BookingClinic.Services.Clinic;
+﻿using BookingClinic.Services;
+using BookingClinic.Services.Appointment;
+using BookingClinic.Services.Clinic;
+using BookingClinic.Services.Data.Appointment;
 using BookingClinic.Services.Data.Doctor;
+using BookingClinic.Services.Doctor;
 using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Speciality;
 using BookingClinic.Services.UserService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -13,18 +19,24 @@ namespace BookingClinic.Controllers
         private readonly IUserService _userService;
         private readonly ISpecialityService _specialityService;
         private readonly IClinicService _clinicService;
+        private readonly IDoctorService _doctorService;
+        private readonly IAppointmentService _appointmentService;
         private readonly IPaginationHelper<SearchDoctorResDto> _paginationHelper;
 
         public DoctorController(
             IUserService userService,
             IPaginationHelper<SearchDoctorResDto> paginationHelper,
             ISpecialityService specialityService,
-            IClinicService clinicService)
+            IClinicService clinicService,
+            IDoctorService doctorService,
+            IAppointmentService appointmentService)
         {
             _userService = userService;
             _paginationHelper = paginationHelper;
             _specialityService = specialityService;
             _clinicService = clinicService;
+            _doctorService = doctorService;
+            _appointmentService = appointmentService;
         }
 
         [HttpGet]
@@ -65,6 +77,41 @@ namespace BookingClinic.Controllers
 
                 return View(dto);
             }
+        }
+
+        [HttpGet("{id:guid}")]
+        public IActionResult Profile([FromRoute] Guid id)
+        {
+            if (TempData["Errors"] != null)
+            {
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+            }
+
+            var res = _doctorService.GetDoctorData(id);
+
+            if (res.IsSuccess)
+            {
+                return View(res.Result);
+            }
+            else
+            {
+                ViewData["Errors"] = res.Errors;
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [Authorize("PatientAppointment")]
+        public async Task<IActionResult> MakeAppointment(
+            [FromForm] MakeAppointmentDto dto)
+        {
+            var res = await _appointmentService.CreateAppointment(dto, User);
+
+            if (!res.IsSuccess)
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+            }
+            return RedirectToAction("Profile", new {id = dto.DoctorId});
         }
     }
 }

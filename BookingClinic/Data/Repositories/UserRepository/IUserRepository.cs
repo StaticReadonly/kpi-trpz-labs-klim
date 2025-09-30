@@ -7,5 +7,7 @@ namespace BookingClinic.Data.Repositories.UserRepository
     {
         IEnumerable<Doctor> GetSearchDoctors();
         UserBase? GetUserByEmail(string email);
+        Doctor? GetDoctorByIdWithAppClinicSpeciality(Guid id);
+        Doctor? GetDoctorById(Guid id);
     }
 }

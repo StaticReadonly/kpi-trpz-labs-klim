@@ -5,5 +5,6 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
 {
     public interface IAppointmentRepository : IRepository<Appointment, Guid>
     {
+        Appointment? GetByDateTime(DateTime dateTime);
     }
 }

@@ -1,4 +1,145 @@
-﻿@{
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using BookingClinic.Services
+@using BookingClinic.Services.Data.Doctor
+@model DoctorDataDto
+@{
     ViewData["Title"] = "Doctor profile";
+    var errors = ViewData["Errors"];
 }
 
+<form id="appointmentForm" method="post" asp-controller="Doctor" asp-action="MakeAppointment" class="d-none">
+    <input type="hidden" name="doctorId" id="doctorIdInput" />
+    <input type="hidden" name="appointmentDay" id="appointmentDayInput" />
+    <input type="hidden" name="appointmentTime" id="appointmentTimeInput" />
+</form>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm appointment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmModalOk">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">Ошибка</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @{
+                    if (errors != null)
+                    {
+                        var error = ((IEnumerable<ServiceError>)errors).First();
+
+                        <div>@error.ErrorMessage</div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3 text-center">
+            @if (Model.ProfilePicture == null)
+            {
+                <img src="~/profiles/default/defaultUser.png" class="img-fluid rounded-circle" style="max-width: 180px;" />
+            }
+            else
+            {
+                <img src="~/profile/users/@Model.ProfilePicture" class="img-fluid rounded-circle" style="max-width: 180px;" />
+            }
+        </div>
+        <div class="col-md-9">
+            <h3>@Model.Name @Model.Surname</h3>
+            <p><strong>Clinic:</strong> @Model.Clinic</p>
+            <p><strong>Speciality:</strong> @Model.Speciality</p>
+            @if (Model.Rating < 0.1)
+            {
+                <p>No rating</p>
+            }
+            else
+            {
+                <p>
+                    <strong>Rating:</strong> @Model.Rating
+                    <a asp-controller="Review" asp-action="Index" asp-route-id="@Model.Id" class="ms-2">
+                        Check reviews
+                    </a>
+                </p>
+            }
+
+            <div class="accordion mt-4" id="appointmentsAccordion">
+                @for (int i = 0; i < Model.Appointments.Count; i++)
+                {
+                    var day = Model.Appointments[i];
+                    var dayId = $"day{i}";
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-@dayId">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@dayId" aria-expanded="false" aria-controls="collapse-@dayId">
+                                @day.Item1
+                            </button>
+                        </h2>
+                        <div id="collapse-@dayId" class="accordion-collapse collapse" aria-labelledby="heading-@dayId" data-bs-parent="#appointmentsAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var time in day.Item2)
+                                    {
+                                        <button type="button" class="btn btn-outline-primary"
+                                                onclick="confirmAppointment('@day.Item1', '@time', '@Model.Id')">
+                                            @time
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let appointmentData = {};
+
+    function confirmAppointment(day, time, doctorId) {
+        appointmentData = { day, time, doctorId };
+        document.getElementById('confirmModalBody').innerText =
+            `Are you sure you want to assign on ${day} in ${time}?`;
+        let modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('confirmModalOk').addEventListener('click', function () {
+            document.getElementById('doctorIdInput').value = appointmentData.doctorId;
+            document.getElementById('appointmentDayInput').value = appointmentData.day;
+            document.getElementById('appointmentTimeInput').value = appointmentData.time;
+            document.getElementById('appointmentForm').submit();
+        });
+
+        @if (errors != null)
+        {
+                <text>
+                let errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+                </text>
+        }
+    });
+</script>

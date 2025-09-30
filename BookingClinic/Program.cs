@@ -1,6 +1,7 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
 using BookingClinic.Services.Extensions;
+using BookingClinic.Services.Helpers.AppointmentHelper;
 using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Mapper;
 using FluentValidation;
@@ -34,8 +35,6 @@ namespace BookingClinic
 
             services.AddAppRepositories();
             services.AddAppServices();
-
-            services.AddScoped(typeof(IPaginationHelper<>), typeof(PaginationHelper<>));
 
             services.AddMapster();
             services.AddAuthentication()
@@ -73,6 +72,12 @@ namespace BookingClinic
                     cfg.RequireAuthenticatedUser()
                         .RequireRole("Admin");
                 });
+                cfg.AddPolicy("PatientAppointment", cfg =>
+                {
+                    cfg.RequireAuthenticatedUser()
+                        .RequireRole("Patient", "Admin")
+                        .AddRequirements();
+                });
             });
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -81,6 +86,8 @@ namespace BookingClinic
             var app = builder.Build();
 
             app.UseHttpsRedirection();
+
+            app.UseStatusCodePages() ;
 
             app.UseStaticFiles();
 

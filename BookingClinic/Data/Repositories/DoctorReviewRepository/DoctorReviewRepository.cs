@@ -1,6 +1,7 @@
 ﻿using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Entities;
 using BookingClinic.Data.Repositories.Abstraction;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookingClinic.Data.Repositories.DoctorReviewRepository
 {
@@ -10,5 +11,8 @@ namespace BookingClinic.Data.Repositories.DoctorReviewRepository
             : base(context)
         {
         }
+
+        public IEnumerable<DoctorReview> GetDoctorsReviews(Guid doctor) =>
+            _dbSet.Where(r => r.DoctorId == doctor).Include(r => r.Doctor).Include(r => r.Patient);
     }
 }

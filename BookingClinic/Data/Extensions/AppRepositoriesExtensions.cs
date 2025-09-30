@@ -3,6 +3,7 @@ using BookingClinic.Data.Repositories.AppointmentRepository;
 using BookingClinic.Data.Repositories.ClinicRepository;
 using BookingClinic.Data.Repositories.DoctorReviewRepository;
 using BookingClinic.Data.Repositories.SpecialityRepository;
+using BookingClinic.Services.Appointment;
 
 namespace BookingClinic.Data.Extensions
 {
@@ -15,6 +16,7 @@ namespace BookingClinic.Data.Extensions
             services.AddScoped<IDoctorReviewRepository, DoctorReviewRepository>();
             services.AddScoped<ISpecialityRepository, SpecialityRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
 
             return services;
         }

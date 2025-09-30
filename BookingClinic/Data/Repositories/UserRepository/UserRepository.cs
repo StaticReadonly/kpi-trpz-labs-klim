@@ -12,6 +12,16 @@ namespace BookingClinic.Data.Repositories.UserRepository
         {
         }
 
+        public Doctor? GetDoctorById(Guid id) =>
+            _context.Set<Doctor>().Include(d => d.Clinic).FirstOrDefault(d => d.Id == id);
+
+        public Doctor? GetDoctorByIdWithAppClinicSpeciality(Guid id) =>
+            _context.Set<Doctor>().Include(d => d.DoctorAppointments)
+                                  .Include(d => d.Clinic)
+                                  .Include(d => d.Speciality)
+                                  .Include(d => d.DoctorReviews)
+                                  .FirstOrDefault();
+
         public IEnumerable<Doctor> GetSearchDoctors() => 
             _context.Set<Doctor>().Include(d => d.Speciality).Include(d => d.Clinic).ToList();
 

@@ -5,6 +5,7 @@ using BookingClinic.Data.Repositories.UserRepository;
 using BookingClinic.Services.Data.Doctor;
 using BookingClinic.Services.Data.User;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -16,15 +17,18 @@ namespace BookingClinic.Services.UserService
         private readonly IUserRepository _userRepository;
         private readonly ISpecialityRepository _specialityRepository;
         private readonly IClinicRepository _clinicRepository;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public UserService(
             IUserRepository userRepository,
             ISpecialityRepository specialityRepository,
-            IClinicRepository clinicRepository)
+            IClinicRepository clinicRepository,
+            IWebHostEnvironment hostEnvironment)
         {
             _userRepository = userRepository;
             _specialityRepository = specialityRepository;
             _clinicRepository = clinicRepository;
+            _hostEnvironment = hostEnvironment;
         }
 
         private string GetPasswordHash(UserBase user, string password)
@@ -195,6 +199,90 @@ namespace BookingClinic.Services.UserService
             var result = user.Adapt<UserPageDataDto>();
 
             return ServiceResult<UserPageDataDto>.Success(result);
+        }
+
+        public async Task<ServiceResult<object>> UpdateUserPhoto(IFormFile file, ClaimsPrincipal principal)
+        {
+            var name = file.FileName;
+            var idx = name.LastIndexOf('.');
+            var newName = Guid.NewGuid().ToString() + name.Substring(idx);
+
+            var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            var userId = userIdClaim!.Value;
+
+            var userEntity = _userRepository.GetById(Guid.Parse(userId));
+
+            if (userEntity == null)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.Unauthorized() });
+            }
+
+            userEntity.ProfilePicture = newName;
+
+            _userRepository.UpdateEntity(userEntity);
+
+            try
+            {
+                var wwwrootPath = _hostEnvironment.WebRootPath;
+
+                var path = Path.Combine(wwwrootPath, "profiles", "users", newName);
+
+                using var newFile = File.Create(path);
+                await file.CopyToAsync(newFile);
+
+                await _userRepository.SaveChangesAsync();
+
+                return ServiceResult<object>.Success(null);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+            }
+        }
+
+        public async Task<ServiceResult<UserPageDataDto>> UpdateUser(UserPageDataUpdateDto dto, ClaimsPrincipal principal)
+        {
+            var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            var userId = userIdClaim!.Value;
+            var user = _userRepository.GetById(Guid.Parse(userId));
+            
+            if (user == null)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(
+                    new List<ServiceError>() { ServiceError.Unauthorized() });
+            }
+
+            if (GetPasswordHash(user, dto.Password) != user.PasswordHash)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(
+                    new List<ServiceError>() { ServiceError.InvalidPassword() });
+            }
+
+            user.Name = dto.Name;
+            user.Surname = dto.Surname;
+            user.Email = dto.Email;
+            user.Phone = dto.Phone;
+            user.PasswordHash = GetPasswordHash(user, dto.Password);
+
+            _userRepository.UpdateEntity(user);
+
+            try
+            {
+                await _userRepository.SaveChangesAsync();
+                return ServiceResult<UserPageDataDto>.Success(user.Adapt<UserPageDataDto>());
+            }
+            catch (DbUpdateException)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(
+                    new List<ServiceError>() { ServiceError.UserAlreadyExists() });
+            }
+            catch (Exception)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(
+                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+            }
         }
     }
 }

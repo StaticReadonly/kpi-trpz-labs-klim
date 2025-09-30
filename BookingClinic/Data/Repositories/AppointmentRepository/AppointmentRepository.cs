@@ -10,5 +10,8 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
             : base(context)
         {
         }
+
+        public Appointment? GetByDateTime(DateTime dateTime) =>
+            _context.Set<Appointment>().FirstOrDefault(a => a.DateTime == dateTime);
     }
 }
