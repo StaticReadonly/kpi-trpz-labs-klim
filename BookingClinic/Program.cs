@@ -87,7 +87,7 @@ namespace BookingClinic
 
             app.UseHttpsRedirection();
 
-            app.UseStatusCodePages() ;
+            app.UseExceptionHandler("/error/errPage");
 
             app.UseStaticFiles();
 

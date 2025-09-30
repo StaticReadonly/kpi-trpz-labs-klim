@@ -5,6 +5,7 @@ using BookingClinic.Services.Data.Appointment;
 using BookingClinic.Services.Data.Doctor;
 using BookingClinic.Services.Doctor;
 using BookingClinic.Services.Helpers.PaginationHelper;
+using BookingClinic.Services.Helpers.ReviewsHelper;
 using BookingClinic.Services.Speciality;
 using BookingClinic.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +23,7 @@ namespace BookingClinic.Controllers
         private readonly IDoctorService _doctorService;
         private readonly IAppointmentService _appointmentService;
         private readonly IPaginationHelper<SearchDoctorResDto> _paginationHelper;
+        private readonly IReviewsHelper _reviewsHelper;
 
         public DoctorController(
             IUserService userService,
@@ -29,7 +31,8 @@ namespace BookingClinic.Controllers
             ISpecialityService specialityService,
             IClinicService clinicService,
             IDoctorService doctorService,
-            IAppointmentService appointmentService)
+            IAppointmentService appointmentService,
+            IReviewsHelper reviewsHelper)
         {
             _userService = userService;
             _paginationHelper = paginationHelper;
@@ -37,6 +40,7 @@ namespace BookingClinic.Controllers
             _clinicService = clinicService;
             _doctorService = doctorService;
             _appointmentService = appointmentService;
+            _reviewsHelper = reviewsHelper;
         }
 
         [HttpGet]
@@ -91,6 +95,11 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                if (User.IsInRole("Patient") || User.IsInRole("Admin"))
+                {
+                    res.Result!.CanWriteReview = _reviewsHelper.CanUserWriteReview(id, User);
+                }
+
                 return View(res.Result);
             }
             else

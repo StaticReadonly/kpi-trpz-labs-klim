@@ -1,5 +1,4 @@
 ﻿using BookingClinic.Services.Appointment;
-using BookingClinic.Services.Data.Appointment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

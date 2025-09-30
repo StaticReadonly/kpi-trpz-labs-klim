@@ -9,6 +9,7 @@
         public string Speciality { get; set; }
         public string? ProfilePicture { get; set; }
         public double Rating { get; set; }
+        public bool CanWriteReview { get; set; }
         public List<Tuple<string, IEnumerable<string>>> Appointments { get; set; }
     }
 }

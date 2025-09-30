@@ -13,5 +13,8 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
 
         public Appointment? GetByDateTime(DateTime dateTime) =>
             _context.Set<Appointment>().FirstOrDefault(a => a.DateTime == dateTime);
+
+        public IEnumerable<Appointment> GetPatientDoctorAppointments(Guid patientId, Guid doctorId) =>
+            _context.Set<Appointment>().Where(a => a.DoctorId == doctorId && a.PatientId == patientId);
     }
 }

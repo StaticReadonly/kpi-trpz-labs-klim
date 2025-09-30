@@ -1,4 +1,6 @@
-﻿using BookingClinic.Services.Review;
+﻿using BookingClinic.Services.Data.Review;
+using BookingClinic.Services.Review;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingClinic.Controllers
@@ -28,6 +30,13 @@ namespace BookingClinic.Controllers
                 ViewData["Errors"] = res.Errors;
                 return View();
             }
+        }
+
+        [HttpPost]
+        [Authorize("PatientAppointment")]
+        public IActionResult CreateReview([FromForm] AddReviewDto dto)
+        {
+            return View();
         }
     }
 }
