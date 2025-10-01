@@ -1,7 +1,10 @@
-﻿using BookingClinic.Services.Data.Review;
+﻿using BookingClinic.Services;
+using BookingClinic.Services.Data.Review;
 using BookingClinic.Services.Review;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -9,11 +12,14 @@ namespace BookingClinic.Controllers
     public class ReviewController : Controller
     {
         private readonly IReviewService _reviewService;
+        private readonly IValidator<AddReviewDto> _addReviewValidator;
 
         public ReviewController(
-            IReviewService reviewService)
+            IReviewService reviewService, 
+            IValidator<AddReviewDto> addReviewValidator)
         {
             _reviewService = reviewService;
+            _addReviewValidator = addReviewValidator;
         }
 
         [HttpGet("{id:guid}")]
@@ -33,10 +39,29 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost]
-        [Authorize("PatientAppointment")]
-        public IActionResult CreateReview([FromForm] AddReviewDto dto)
+        [Authorize("AuthUser")]
+        public async Task<IActionResult> CreateReview([FromForm] AddReviewDto dto)
         {
-            return View();
+            var validationRes = _addReviewValidator.Validate(dto);
+
+            if (!validationRes.IsValid)
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(
+                    new List<ServiceError>() { ServiceError.InvalidReviewData()});
+                return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId});
+            }
+
+            var res = await _reviewService.CreateReview(dto, User);
+
+            if (res.IsSuccess)
+            {
+                return RedirectToAction("Index", new {id = dto.DoctorId});
+            }
+            else
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
+            }
         }
     }
 }

@@ -13,6 +13,8 @@
 
         public static ServiceError UnexpectedError() =>
             new("Unexpected error", "Some unexpected error happened");
+        public static ServiceError InvalidReviewData() =>
+            new("Review error", "Invalid review text or rating!");
 
         public static ServiceError UserAlreadyExists() => 
             new("User already exists", "User already exists");

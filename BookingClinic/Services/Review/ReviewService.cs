@@ -1,7 +1,9 @@
-﻿using BookingClinic.Data.Repositories.DoctorReviewRepository;
+﻿using BookingClinic.Data.Entities;
+using BookingClinic.Data.Repositories.DoctorReviewRepository;
 using BookingClinic.Data.Repositories.UserRepository;
 using BookingClinic.Services.Data.Review;
 using Mapster;
+using System.Security.Claims;
 
 namespace BookingClinic.Services.Review
 {
@@ -16,6 +18,35 @@ namespace BookingClinic.Services.Review
         {
             _reviewsRepository = reviewsRepository;
             _usersRepository = usersRepository;
+        }
+
+        public async Task<ServiceResult<object>> CreateReview(AddReviewDto dto, ClaimsPrincipal principal)
+        {
+            var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            var userId = Guid.Parse(userIdClaim!.Value);
+
+            DoctorReview rev = new()
+            {
+                Id = Guid.NewGuid(),
+                DoctorId = dto.DoctorId,
+                PatientId = userId,
+                Rating = dto.Rating,
+                Text = dto.Text
+            };
+
+            _reviewsRepository.AddEntity(rev);
+
+            try
+            {
+                await _reviewsRepository.SaveChangesAsync();
+
+                return ServiceResult<object>.Success(null);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+            }
         }
 
         public ServiceResult<DoctorReviewsDto> GetDoctorReviews(Guid doctorId)

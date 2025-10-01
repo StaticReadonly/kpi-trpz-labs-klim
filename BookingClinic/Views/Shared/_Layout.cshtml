@@ -33,6 +33,7 @@
             </nav>
         </header>
         <main class="container my-4 flex-grow-1">
+            @await Html.PartialAsync("_ErrorModal")
             @RenderBody()
         </main>
         <footer class="bg-light text-center py-3 mt-auto border-top">

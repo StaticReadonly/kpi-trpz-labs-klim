@@ -8,6 +8,8 @@ using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Helpers.ReviewsHelper;
 using BookingClinic.Services.Speciality;
 using BookingClinic.Services.UserService;
+using FluentValidation.AspNetCore;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -91,6 +93,15 @@ namespace BookingClinic.Controllers
                 ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
             }
 
+            if (TempData["ReviewErrors"] != null)
+            {
+                List<ValidationFailure> failures = 
+                    JsonSerializer.Deserialize<List<ValidationFailure>>(TempData["ReviewErrors"].ToString());
+
+                var valRes = new ValidationResult(failures);
+                valRes.AddToModelState(ModelState);
+            }
+
             var res = _doctorService.GetDoctorData(id);
 
             if (res.IsSuccess)
@@ -110,7 +121,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost]
-        [Authorize("PatientAppointment")]
+        [Authorize("AuthUser")]
         public async Task<IActionResult> MakeAppointment(
             [FromForm] MakeAppointmentDto dto)
         {
@@ -119,8 +130,9 @@ namespace BookingClinic.Controllers
             if (!res.IsSuccess)
             {
                 TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                return RedirectToAction("Profile", new { id = dto.DoctorId });
             }
-            return RedirectToAction("Profile", new {id = dto.DoctorId});
+            return RedirectToAction("Index", "User");
         }
     }
 }

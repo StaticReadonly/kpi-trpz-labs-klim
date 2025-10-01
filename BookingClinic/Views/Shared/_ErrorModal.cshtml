@@ -1,0 +1,39 @@
+﻿@using BookingClinic.Services
+@{
+    var errors = ViewData["Errors"];
+    ServiceError? error = null;
+
+    if (errors != null)
+    {
+        error = ((IEnumerable<ServiceError>)errors).First();
+    }
+}
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">@error?.ErrorName</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>@error?.ErrorMessage</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (error != null)
+        {
+            <text>
+                let errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            </text>
+        }
+    });
+</script>

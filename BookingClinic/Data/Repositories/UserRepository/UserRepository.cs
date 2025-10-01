@@ -20,7 +20,7 @@ namespace BookingClinic.Data.Repositories.UserRepository
                                   .Include(d => d.Clinic)
                                   .Include(d => d.Speciality)
                                   .Include(d => d.DoctorReviews)
-                                  .FirstOrDefault();
+                                  .FirstOrDefault(d => d.Id == id);
 
         public IEnumerable<Doctor> GetSearchDoctors() => 
             _context.Set<Doctor>().Include(d => d.Speciality).Include(d => d.Clinic).ToList();

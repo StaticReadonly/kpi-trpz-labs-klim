@@ -24,7 +24,7 @@ namespace BookingClinic.Services.Appointment
             var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
             var id = Guid.Parse(idClaim.Value);
 
-            var doctor = _userRepository.GetDoctorById(id);
+            var doctor = _userRepository.GetDoctorById(dto.DoctorId);
 
             if (doctor == null)
             {
@@ -38,9 +38,8 @@ namespace BookingClinic.Services.Appointment
             var hoursMinutes = times[0].Split(':');
             var hours = int.Parse(hoursMinutes[0]);
             var minutes = int.Parse(hoursMinutes[1]);
-            DateTime dateTime = DateTime.ParseExact(dto.AppointmentDay, "dd.MM.yyyy", CultureInfo.InvariantCulture);
-            dateTime.AddHours(hours);
-            dateTime.AddMinutes(minutes);
+            DateTime dateTime = DateTime.ParseExact(dto.AppointmentDay.Split(',')[1].Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
+            dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
 
             var app = _appointmentRepository.GetByDateTime(dateTime);
 

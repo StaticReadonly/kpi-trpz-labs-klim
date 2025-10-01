@@ -7,30 +7,6 @@
     var errors = ViewData["Errors"];
 }
 
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="errorModalLabel">Ошибка</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @{
-                    if (errors != null)
-                    {
-                        var error = ((IEnumerable<ServiceError>)errors).First();
-
-                        <div>@error.ErrorMessage</div>
-                    }
-                }
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
@@ -68,15 +44,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        @if (errors != null)
-        {
-                 <text>
-                     let errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                     errorModal.show();
-                 </text>
-        }
-    });
-</script>
