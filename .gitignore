@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+/BookingClinic/wwwroot/profiles/default/*
+/BookingClinic/wwwroot/profile/users/*
+
 # dotenv files
 .env
 
