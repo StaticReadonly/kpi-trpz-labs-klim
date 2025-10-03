@@ -5,6 +5,13 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClinic", "BookingClinic\BookingClinic.csproj", "{91EFEC24-982D-401A-BECB-B810836C9B26}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
+	ProjectSection(SolutionItems) = preProject
+		Reports\Клим'юк В.Л. Лаб-1.pdf = Reports\Клим'юк В.Л. Лаб-1.pdf
+		Reports\Клим'юк В.Л. Лаб-2.pdf = Reports\Клим'юк В.Л. Лаб-2.pdf
+		Reports\Клим'юк В.Л. Лаб-3.pdf = Reports\Клим'юк В.Л. Лаб-3.pdf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
