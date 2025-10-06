@@ -20,6 +20,12 @@ namespace BookingClinic.Services.Helpers.ReviewsHelper
         public bool CanUserWriteReview(Guid doctorId, ClaimsPrincipal principal)
         {
             var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+
+            if (idClaim == null)
+            {
+                return false;
+            }
+
             var idValue = Guid.Parse(idClaim.Value);
 
             var resHasReviews = !_reviewRepository.GetDoctorPatientReviews(doctorId, idValue).Any();

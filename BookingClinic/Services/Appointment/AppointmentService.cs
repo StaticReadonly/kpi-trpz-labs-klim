@@ -1,6 +1,7 @@
 ﻿using BookingClinic.Data.Repositories.AppointmentRepository;
 using BookingClinic.Data.Repositories.UserRepository;
 using BookingClinic.Services.Data.Appointment;
+using Mapster;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -65,6 +66,79 @@ namespace BookingClinic.Services.Appointment
             {
                 await _appointmentRepository.SaveChangesAsync();
 
+                return ServiceResult<object>.Success(null);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+            }
+        }
+
+        public ServiceResult<List<PatientAppointmentDto>> GetPatientAppointments(ClaimsPrincipal principal)
+        {
+            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            Guid id = Guid.Parse(idClaim.Value);
+
+            var res = _appointmentRepository.GetPatientAppointments(id).ToList();
+
+            var appointments = res.Adapt<List<PatientAppointmentDto>>();
+            return ServiceResult<List<PatientAppointmentDto>>.Success(appointments);
+        }
+
+        public ServiceResult<List<DoctorAppointmentDto>> GetDoctorAppointments(ClaimsPrincipal principal)
+        {
+            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            Guid id = Guid.Parse(idClaim.Value);
+
+            var res = _appointmentRepository.GetDoctorAppointments(id, DateTime.UtcNow.Date);
+
+            var appointments = res.Adapt<List<DoctorAppointmentDto>>();
+            return ServiceResult<List<DoctorAppointmentDto>>.Success(appointments);
+        }
+
+        public async Task<ServiceResult<object>> CancelAppointment(Guid appId)
+        {
+            var appointment = _appointmentRepository.GetById(appId);
+
+            if (appointment == null)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.AppointmentNotFound() });
+            }
+
+            appointment.IsCanceled = true;
+            _appointmentRepository.UpdateEntity(appointment);
+
+            try
+            {
+                await _appointmentRepository.SaveChangesAsync();
+                return ServiceResult<object>.Success(null);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+            }
+        }
+
+        public async Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto)
+        {
+            var appointment = _appointmentRepository.GetById(dto.Id);
+
+            if (appointment == null)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.AppointmentNotFound() });
+            }
+
+            appointment.IsFinished = true;
+            appointment.Results = dto.Results;
+            _appointmentRepository.UpdateEntity(appointment);
+
+            try
+            {
+                await _appointmentRepository.SaveChangesAsync();
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)

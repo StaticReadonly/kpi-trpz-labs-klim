@@ -1,8 +1,6 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
 using BookingClinic.Services.Extensions;
-using BookingClinic.Services.Helpers.AppointmentHelper;
-using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Mapper;
 using FluentValidation;
 using Mapster;

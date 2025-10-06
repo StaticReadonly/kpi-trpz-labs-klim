@@ -33,5 +33,8 @@
 
         public static ServiceError AppointmentAlreadyExists() =>
             new("Appointment exists", "Appointment already exists");
+
+        public static ServiceError AppointmentNotFound() =>
+            new("Appointment doesn't exist", "Appointment doesn't exist");
     }
 }

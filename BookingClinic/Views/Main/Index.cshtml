@@ -9,13 +9,13 @@
         <a href="/user" class="btn btn-outline-primary btn-lg py-4">Your account</a>
         <a href="/doctors" class="btn btn-outline-primary btn-lg py-4">Find doctors</a>
 
-        @if (User.IsInRole("Patient"))
+        @if (User.IsInRole("Patient") || User.IsInRole("Admin"))
         {
-            <a href="/appointments" class="btn btn-outline-primary btn-lg py-4">My appointments</a>
+            <a href="/appointment" class="btn btn-outline-primary btn-lg py-4">My appointments</a>
         }
         @if (User.IsInRole("Doctor"))
         {
-            <a href="/doctor/today" class="btn btn-outline-primary btn-lg py-4">Today's appointments</a>
+            <a href="/appointment" class="btn btn-outline-primary btn-lg py-4">Today's appointments</a>
         }
         @if (User.IsInRole("Admin"))
         {

@@ -1,6 +1,7 @@
 ﻿using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Entities;
 using BookingClinic.Data.Repositories.Abstraction;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookingClinic.Data.Repositories.AppointmentRepository
 {
@@ -12,7 +13,16 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
         }
 
         public Appointment? GetByDateTime(DateTime dateTime) =>
-            _context.Set<Appointment>().FirstOrDefault(a => a.DateTime == dateTime);
+            _dbSet.FirstOrDefault(a => a.DateTime == dateTime);
+
+        public IEnumerable<Appointment> GetDoctorAppointments(Guid doctorId, DateTime currentDate) =>
+            _dbSet.Where(a => a.DoctorId == doctorId && a.DateTime.Date == currentDate && !a.IsFinished)
+                    .Include(a => a.Patient);
+
+        public IEnumerable<Appointment> GetPatientAppointments(Guid patientId) =>
+            _dbSet.Where(a => a.PatientId == patientId)
+                    .Include(a => a.Doctor).ThenInclude(d => d.Clinic);
+
 
         public IEnumerable<Appointment> GetPatientDoctorAppointments(Guid patientId, Guid doctorId) =>
             _context.Set<Appointment>().Where(a => a.DoctorId == doctorId && a.PatientId == patientId && a.IsFinished);
