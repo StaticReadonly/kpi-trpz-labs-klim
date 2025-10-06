@@ -1,7 +1,10 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
 using BookingClinic.Services.Extensions;
+using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
+using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
 using BookingClinic.Services.Mapper;
+using BookingClinic.Services.Options;
 using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +36,19 @@ namespace BookingClinic
 
             services.AddAppRepositories();
             services.AddAppServices();
+
+            services.AddScoped<IDoctorSorter, DoctorSorter>();
+
+            services.Configure<DoctorSortingOptions>(cfg =>
+            {
+                cfg.Strategies = new Dictionary<string, IDoctorSorterStrategy>();
+                var strats = cfg.Strategies;
+
+                strats["Name Asc"] = new SortByNameAscStrategy();
+                strats["Name Desc"] = new SortByNameDescStrategy();
+                strats["Surname Asc"] = new SortBySurnameAscStrategy();
+                strats["Surname Desc"] = new SortBySurnameDescStrategy();
+            });
 
             services.AddMapster();
             services.AddAuthentication()

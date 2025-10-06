@@ -6,10 +6,10 @@
     var data = (IEnumerable<SearchDoctorResDto>)ViewData["Doctors"];
     var pages = (IEnumerable<int>)ViewData["Pages"];
     var currentPage = (int)ViewData["Page"];
-    var ordering = ViewData["Ordering"];
     var specialities = (IEnumerable<string>)ViewData["Specialities"];
     var clinics = (IEnumerable<string>)ViewData["Clinics"];
     var queryString = Context.Request.QueryString.Value;
+    var sortings = (List<string>)ViewData["Sortings"];
 
     if (!string.IsNullOrEmpty(queryString))
     {
@@ -38,6 +38,15 @@
             @foreach (var c in clinics)
             {
                 <option value="@c">@c</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select class="form-select" asp-for="OrderBy">
+            <option value="">Sort by</option>
+            @foreach (var s in sortings)
+            {
+                <option value="@s">@s</option>
             }
         </select>
     </div>
@@ -83,10 +92,10 @@
             {
                 href = $"./doctors{queryString}&page={p}";
             }
-            if (ordering != null)
+            @* if (!string.IsNullOrWhiteSpace(Model.OrderBy))
             {
-                href += $"&ordering={ordering}";
-            }
+                href += $"&ordering={Model.OrderBy}";
+            } *@
             <li class="page-item @(p == currentPage ? "active" : "")">
                 <a class="page-link" href="@href">@p</a>
             </li>

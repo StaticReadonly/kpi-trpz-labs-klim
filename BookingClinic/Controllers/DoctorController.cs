@@ -4,14 +4,18 @@ using BookingClinic.Services.Clinic;
 using BookingClinic.Services.Data.Appointment;
 using BookingClinic.Services.Data.Doctor;
 using BookingClinic.Services.Doctor;
+using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
+using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
 using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Helpers.ReviewsHelper;
+using BookingClinic.Services.Options;
 using BookingClinic.Services.Speciality;
 using BookingClinic.Services.UserService;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BookingClinic.Controllers
@@ -26,6 +30,8 @@ namespace BookingClinic.Controllers
         private readonly IAppointmentService _appointmentService;
         private readonly IPaginationHelper<SearchDoctorResDto> _paginationHelper;
         private readonly IReviewsHelper _reviewsHelper;
+        private readonly IDoctorSorter _doctorSorter;
+        private readonly Dictionary<string, IDoctorSorterStrategy> _docSortingStrategies;
 
         public DoctorController(
             IUserService userService,
@@ -34,7 +40,9 @@ namespace BookingClinic.Controllers
             IClinicService clinicService,
             IDoctorService doctorService,
             IAppointmentService appointmentService,
-            IReviewsHelper reviewsHelper)
+            IReviewsHelper reviewsHelper,
+            IDoctorSorter doctorSorter,
+            IOptions<DoctorSortingOptions> docSortingStrategies)
         {
             _userService = userService;
             _paginationHelper = paginationHelper;
@@ -43,10 +51,12 @@ namespace BookingClinic.Controllers
             _doctorService = doctorService;
             _appointmentService = appointmentService;
             _reviewsHelper = reviewsHelper;
+            _doctorSorter = doctorSorter;
+            _docSortingStrategies = docSortingStrategies.Value.Strategies;
         }
 
         [HttpGet]
-        public IActionResult Index([FromQuery] SearchDoctorDto dto, [FromQuery] int page, [FromQuery] string? orderBy)
+        public IActionResult Index([FromQuery] SearchDoctorDto dto, [FromQuery] int page)
         {
             var res = _userService.SearchDoctors(dto);
             var specialities = _specialityService.GetSpecialityNames();
@@ -61,13 +71,17 @@ namespace BookingClinic.Controllers
             {
                 ViewData["Clinics"] = clinics.Result;
             }
-            
-            ViewData["Ordering"] = orderBy;
+
+            ViewData["Sortings"] = _docSortingStrategies.Keys.ToList();
             ViewData["Page"] = page;
 
             if (res.IsSuccess)
             {
-                var doctors = _paginationHelper.Paginate(res.Result, page, 5, out var pages);
+                _doctorSorter.SetStrategy(dto.OrderBy);
+
+                var orderDoctors = _doctorSorter.Sort(res.Result!);
+
+                var doctors = _paginationHelper.Paginate(orderDoctors, page, 5, out var pages);
 
                 ViewData["Pages"] = pages;
                 ViewData["Doctors"] = doctors;
