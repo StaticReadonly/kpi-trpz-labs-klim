@@ -134,5 +134,23 @@ namespace BookingClinic.Controllers
             }
             return RedirectToAction("Index", "User");
         }
+
+        [HttpPost("docApp")]
+        [Authorize("Doctors")]
+        public async Task<IActionResult> MakeAppointmentDoctor(
+            [FromForm] MakeAppointmentDocDto dto)
+        {
+            var res = await _appointmentService.CreateAppointmentDoctor(dto, User);
+
+            if (res.IsSuccess)
+            {
+                return RedirectToAction("FinishedAppointment", "Appointment", new { dto.PatientId });
+            }
+            else
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                return RedirectToAction("Index", "Appointment");
+            }
+        }
     }
 }

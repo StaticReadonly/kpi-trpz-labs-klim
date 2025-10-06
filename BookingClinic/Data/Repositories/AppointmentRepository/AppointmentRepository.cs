@@ -16,7 +16,7 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
             _dbSet.FirstOrDefault(a => a.DateTime == dateTime);
 
         public IEnumerable<Appointment> GetDoctorAppointments(Guid doctorId, DateTime currentDate) =>
-            _dbSet.Where(a => a.DoctorId == doctorId && a.DateTime.Date == currentDate && !a.IsFinished)
+            _dbSet.Where(a => a.DoctorId == doctorId && a.DateTime.Date == currentDate && !a.IsFinished && !a.IsCanceled)
                     .Include(a => a.Patient);
 
         public IEnumerable<Appointment> GetPatientAppointments(Guid patientId) =>
