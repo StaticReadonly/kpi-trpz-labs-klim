@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 		Reports\Клим'юк В.Л. Лаб-1.pdf = Reports\Клим'юк В.Л. Лаб-1.pdf
 		Reports\Клим'юк В.Л. Лаб-2.pdf = Reports\Клим'юк В.Л. Лаб-2.pdf
 		Reports\Клим'юк В.Л. Лаб-3.pdf = Reports\Клим'юк В.Л. Лаб-3.pdf
+		Reports\Клим'юк В.Л. Лаб-4.pdf = Reports\Клим'юк В.Л. Лаб-4.pdf
 	EndProjectSection
 EndProject
 Global
@@ -25,5 +26,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0EA3EB35-6EF7-42B6-AAA0-B286CFE169EB}
 	EndGlobalSection
 EndGlobal
