@@ -46,8 +46,6 @@ namespace BookingClinic
 
                 strats["Name Asc"] = new SortByNameAscStrategy();
                 strats["Name Desc"] = new SortByNameDescStrategy();
-                strats["Surname Asc"] = new SortBySurnameAscStrategy();
-                strats["Surname Desc"] = new SortBySurnameDescStrategy();
             });
 
             services.AddMapster();
