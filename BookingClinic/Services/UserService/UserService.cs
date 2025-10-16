@@ -4,6 +4,7 @@ using BookingClinic.Data.Repositories.SpecialityRepository;
 using BookingClinic.Data.Repositories.UserRepository;
 using BookingClinic.Services.Data.Doctor;
 using BookingClinic.Services.Data.User;
+using BookingClinic.Services.NotificationService.AdminNotificationService;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -18,17 +19,20 @@ namespace BookingClinic.Services.UserService
         private readonly ISpecialityRepository _specialityRepository;
         private readonly IClinicRepository _clinicRepository;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IAdminAlertQueue _alertQueue;
 
         public UserService(
             IUserRepository userRepository,
             ISpecialityRepository specialityRepository,
             IClinicRepository clinicRepository,
-            IWebHostEnvironment hostEnvironment)
+            IWebHostEnvironment hostEnvironment,
+            IAdminAlertQueue alertQueue)
         {
             _userRepository = userRepository;
             _specialityRepository = specialityRepository;
             _clinicRepository = clinicRepository;
             _hostEnvironment = hostEnvironment;
+            _alertQueue = alertQueue;
         }
 
         private string GetPasswordHash(UserBase user, string password)
@@ -54,11 +58,12 @@ namespace BookingClinic.Services.UserService
             return new ClaimsPrincipal(identity);
         }
 
-        public ServiceResult<IEnumerable<SearchDoctorResDto>> SearchDoctors(SearchDoctorDto dto)
+        public async Task<ServiceResult<IEnumerable<SearchDoctorResDto>>> SearchDoctors(SearchDoctorDto dto)
         {
+            IEnumerable<BookingClinic.Data.Entities.Doctor>? doctors = null;
             try
             {
-                var doctors = _userRepository.GetSearchDoctors();
+                doctors = _userRepository.GetSearchDoctors();
 
                 if (!string.IsNullOrEmpty(dto.Speciality))
                 {
@@ -73,43 +78,45 @@ namespace BookingClinic.Services.UserService
 
                     doctors = doctors.Where(d => d.ClinicId == clinic.Id);
                 }
-
-                if (!string.IsNullOrEmpty(dto.Query))
-                {
-                    var nameSurname = dto.Query.Trim().Split(' ').Take(2).Select(s => s.ToLower()).ToArray();
-
-                    if (nameSurname.Count() == 2)
-                    {
-                        doctors = doctors.Where(d =>
-                        {
-                            var name = d.Name.ToLower();
-                            var surname = d.Surname.ToLower();
-
-                            return name.Contains(nameSurname[0]) || name.Contains(nameSurname[1]) ||
-                            surname.Contains(nameSurname[0]) || surname.Contains(nameSurname[1]);
-                        });
-                    }
-                    else
-                    {
-                        doctors = doctors.Where(d =>
-                        {
-                            var name = d.Name.ToLower();
-                            var surname = d.Surname.ToLower();
-
-                            return name.Contains(nameSurname[0]) || surname.Contains(nameSurname[0]);
-                        });
-                    }
-                }
-
-                var res = doctors.ToList().Adapt<IEnumerable<SearchDoctorResDto>>();
-
-                return ServiceResult<IEnumerable<SearchDoctorResDto>>.Success(res);
             }
-            catch(Exception)
+            catch (Exception)
             {
+                await _alertQueue.EnqueueAsync(
+                     new AdminAlert("Db error", "Unable to retrieve data from db"));
+
                 return ServiceResult<IEnumerable<SearchDoctorResDto>>.Failure(
                     new List<ServiceError>() { ServiceError.UnexpectedError() });
             }
+
+            if (!string.IsNullOrEmpty(dto.Query))
+            {
+                var nameSurname = dto.Query.Trim().Split(' ').Take(2).Select(s => s.ToLower()).ToArray();
+
+                if (nameSurname.Count() == 2)
+                {
+                    doctors = doctors.Where(d =>
+                    {
+                        var name = d.Name.ToLower();
+                        var surname = d.Surname.ToLower();
+
+                        return name.Contains(nameSurname[0]) || name.Contains(nameSurname[1]) ||
+                        surname.Contains(nameSurname[0]) || surname.Contains(nameSurname[1]);
+                    });
+                }
+                else
+                {
+                    doctors = doctors.Where(d =>
+                    {
+                        var name = d.Name.ToLower();
+                        var surname = d.Surname.ToLower();
+
+                        return name.Contains(nameSurname[0]) || surname.Contains(nameSurname[0]);
+                    });
+                }
+            }
+            var res = doctors.ToList().Adapt<IEnumerable<SearchDoctorResDto>>();
+
+            return ServiceResult<IEnumerable<SearchDoctorResDto>>.Success(res);
         }
 
         public ServiceResult<ClaimsPrincipal> LoginUser(LoginUserDto dto)

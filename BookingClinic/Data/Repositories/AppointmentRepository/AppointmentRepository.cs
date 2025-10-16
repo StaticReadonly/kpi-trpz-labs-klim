@@ -12,6 +12,10 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
         {
         }
 
+        public IEnumerable<Appointment> GetAllScheduledForDay(DateTime date) =>
+            _dbSet.Where(a => a.DateTime.Date == date.Date && !a.IsFinished && !a.IsCanceled)
+                .Include(a => a.Patient);
+
         public Appointment? GetByDateTime(DateTime dateTime) =>
             _dbSet.FirstOrDefault(a => a.DateTime == dateTime);
 

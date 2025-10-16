@@ -56,39 +56,13 @@ namespace BookingClinic.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index([FromQuery] SearchDoctorDto dto, [FromQuery] int page)
+        public async Task<IActionResult> Index([FromQuery] SearchDoctorDto dto, [FromQuery] int page)
         {
-            var res = _userService.SearchDoctors(dto);
-            var specialities = _specialityService.GetSpecialityNames();
-            var clinics = _clinicService.GetClinicNames();
-
-            if (specialities.IsSuccess)
-            {
-                ViewData["Specialities"] = specialities.Result;
-            }
-
-            if (clinics.IsSuccess)
-            {
-                ViewData["Clinics"] = clinics.Result;
-            }
-
             ViewData["Sortings"] = _docSortingStrategies.Keys.ToList();
-            ViewData["Page"] = page;
 
-            if (res.IsSuccess)
-            {
-                _doctorSorter.SetStrategy(dto.OrderBy);
+            var res = await _userService.SearchDoctors(dto);
 
-                var orderDoctors = _doctorSorter.Sort(res.Result!);
-
-                var doctors = _paginationHelper.Paginate(orderDoctors, page, 5, out var pages);
-
-                ViewData["Pages"] = pages;
-                ViewData["Doctors"] = doctors;
-
-                return View(dto);
-            }
-            else
+            if (!res.IsSuccess)
             {
                 ViewData["Page"] = 1;
                 ViewData["Pages"] = new List<int> { 1 };
@@ -97,10 +71,44 @@ namespace BookingClinic.Controllers
 
                 return View(dto);
             }
+
+            var specialities = _specialityService.GetSpecialityNames();
+            var clinics = _clinicService.GetClinicNames();
+
+            if (specialities.IsSuccess)
+            {
+                ViewData["Specialities"] = specialities.Result;
+            }
+            else
+            {
+                ViewData["Specialities"] = Array.Empty<string>();
+            }
+
+            if (clinics.IsSuccess)
+            {
+                ViewData["Clinics"] = clinics.Result;
+            }
+            else
+            {
+                ViewData["Clinics"] = Array.Empty<string>();
+            }
+
+            ViewData["Page"] = page;
+
+            _doctorSorter.SetStrategy(dto.OrderBy);
+
+            var orderDoctors = _doctorSorter.Sort(res.Result!);
+
+            var doctors = _paginationHelper.Paginate(orderDoctors, page, 5, out var pages);
+
+            ViewData["Pages"] = pages;
+            ViewData["Doctors"] = doctors;
+
+            return View(dto);
         }
 
         [HttpGet("{id:guid}")]
-        public IActionResult Profile([FromRoute] Guid id)
+        public async Task<IActionResult> Profile([FromRoute] Guid id)
         {
             if (TempData["Errors"] != null)
             {
@@ -116,7 +124,7 @@ namespace BookingClinic.Controllers
                 valRes.AddToModelState(ModelState);
             }
 
-            var res = _doctorService.GetDoctorData(id);
+            var res = await _doctorService.GetDoctorData(id);
 
             if (res.IsSuccess)
             {

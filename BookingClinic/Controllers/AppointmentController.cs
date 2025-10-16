@@ -82,11 +82,11 @@ namespace BookingClinic.Controllers
 
         [HttpGet("finishedApp")]
         [Authorize("Doctors")]
-        public IActionResult FinishedAppointment([FromQuery] Guid patientId)
+        public async Task<IActionResult> FinishedAppointment([FromQuery] Guid patientId)
         {
             var docId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value;
 
-            var res = _doctorService.GetDoctorData(Guid.Parse(docId));
+            var res = await _doctorService.GetDoctorData(Guid.Parse(docId));
 
             if (res.IsSuccess)
             {

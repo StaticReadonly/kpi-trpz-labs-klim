@@ -4,11 +4,16 @@ using BookingClinic.Services.Extensions;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
 using BookingClinic.Services.Mapper;
+using BookingClinic.Services.NotificationService;
+using BookingClinic.Services.NotificationService.AdminNotificationService;
+using BookingClinic.Services.NotificationService.EmailNotificationSender;
+using BookingClinic.Services.NotificationService.TelegramNotificationSender;
 using BookingClinic.Services.Options;
 using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace BookingClinic
@@ -38,7 +43,45 @@ namespace BookingClinic
             services.AddAppServices();
 
             services.AddScoped<IDoctorSorter, DoctorSorter>();
+            services.AddSingleton<EmailNotificationSender>();
+            services.AddTransient<EmailSenderAdapter>();
+            services.AddTransient<TelegramSenderAdapter>();
 
+            builder.Services.AddSingleton<IAdminAlertQueue>(_ => new AdminAlertQueue(capacity: 500));
+            services.AddHostedService<AdminNotificationBg>();
+
+            services.AddTransient<Func<string, INotificationSender>>(sp => key =>
+            {
+                return key switch
+                {
+                    "email" => sp.GetRequiredService<EmailSenderAdapter>(),
+                    "telegram" => sp.GetRequiredService<TelegramSenderAdapter>(),
+                    _ => throw new ArgumentException($"Unknown notification type: {key}")
+                };
+            });
+
+            services.Configure<AdminNotificationsOptions>(cfg =>
+            {
+                var section = config.GetSection("AdminNotifications");
+
+                cfg.Emails = section.GetSection("Emails").Get<string[]>();
+            });
+            services.Configure<TelegramNotificationSenderOptions>(cfg =>
+            {
+                var section = config.GetSection("Telegram");
+
+                cfg.ApiKey = section["APIKey"];
+                cfg.ChatId = long.Parse(section["ChatId"]);
+            });
+            services.Configure<EmailNotificationSenderOptions>(cfg =>
+            {
+                var section = config.GetSection("Gmail");
+
+                cfg.Server = section["Server"];
+                cfg.Port = int.Parse(section["Port"] ?? "0");
+                cfg.Username = section["Username"];
+                cfg.Password = section["Password"];
+            });
             services.Configure<DoctorSortingOptions>(cfg =>
             {
                 cfg.Strategies = new Dictionary<string, IDoctorSorterStrategy>();
@@ -61,7 +104,6 @@ namespace BookingClinic
                     cfg.LoginPath = "/user/login";
                     cfg.LogoutPath = "/user/logout";
                 });
-
 
             services.AddAuthorization(cfg =>
             {

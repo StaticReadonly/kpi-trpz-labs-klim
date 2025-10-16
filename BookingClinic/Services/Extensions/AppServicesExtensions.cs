@@ -1,4 +1,5 @@
-﻿using BookingClinic.Services.Clinic;
+﻿using BookingClinic.Services.Appointment;
+using BookingClinic.Services.Clinic;
 using BookingClinic.Services.Doctor;
 using BookingClinic.Services.Helpers.AppointmentHelper;
 using BookingClinic.Services.Helpers.PaginationHelper;
@@ -22,6 +23,7 @@ namespace BookingClinic.Services.Extensions
             services.AddScoped<ISpecialityService, SpecialityService>();
             services.AddScoped<IDoctorService, DoctorService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
 
             return services;
         }

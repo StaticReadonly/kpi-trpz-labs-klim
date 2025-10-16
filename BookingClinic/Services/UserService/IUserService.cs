@@ -6,7 +6,7 @@ namespace BookingClinic.Services.UserService
 {
     public interface IUserService
     {
-        ServiceResult<IEnumerable<SearchDoctorResDto>> SearchDoctors(SearchDoctorDto dto);
+        Task<ServiceResult<IEnumerable<SearchDoctorResDto>>> SearchDoctors(SearchDoctorDto dto);
         ServiceResult<ClaimsPrincipal> LoginUser(LoginUserDto dto);
         Task<ServiceResult<ClaimsPrincipal>> RegisterUser(RegisterUserDto dto);
         ServiceResult<UserPageDataDto> GetUserData(ClaimsPrincipal userPrincipal);
