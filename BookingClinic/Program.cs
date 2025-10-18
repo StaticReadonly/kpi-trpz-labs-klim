@@ -13,7 +13,6 @@ using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace BookingClinic
@@ -44,34 +43,24 @@ namespace BookingClinic
 
             services.AddScoped<IDoctorSorter, DoctorSorter>();
             services.AddSingleton<EmailNotificationSender>();
-            services.AddTransient<EmailSenderAdapter>();
-            services.AddTransient<TelegramSenderAdapter>();
 
             builder.Services.AddSingleton<IAdminAlertQueue>(_ => new AdminAlertQueue(capacity: 500));
             services.AddHostedService<AdminNotificationBg>();
 
-            services.AddTransient<Func<string, INotificationSender>>(sp => key =>
-            {
-                return key switch
-                {
-                    "email" => sp.GetRequiredService<EmailSenderAdapter>(),
-                    "telegram" => sp.GetRequiredService<TelegramSenderAdapter>(),
-                    _ => throw new ArgumentException($"Unknown notification type: {key}")
-                };
-            });
+            services.AddTransient<INotificationSender, NotificationSenderAdapter>();
 
             services.Configure<AdminNotificationsOptions>(cfg =>
             {
                 var section = config.GetSection("AdminNotifications");
 
                 cfg.Emails = section.GetSection("Emails").Get<string[]>();
+                cfg.ChatIds = section.GetSection("ChatIds").Get<long[]>();
             });
             services.Configure<TelegramNotificationSenderOptions>(cfg =>
             {
                 var section = config.GetSection("Telegram");
 
                 cfg.ApiKey = section["APIKey"];
-                cfg.ChatId = long.Parse(section["ChatId"]);
             });
             services.Configure<EmailNotificationSenderOptions>(cfg =>
             {
