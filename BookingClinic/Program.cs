@@ -1,5 +1,7 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
+using BookingClinic.Services.AppointmentObserver.Observer;
+using BookingClinic.Services.AppointmentObserver.Subject;
 using BookingClinic.Services.Extensions;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
@@ -48,6 +50,15 @@ namespace BookingClinic
             services.AddHostedService<AdminNotificationBg>();
 
             services.AddTransient<INotificationSender, NotificationSenderAdapter>();
+
+            services.AddSingleton<IAppointmentSubject, AppointmentSubject>(cfg =>
+            {
+                var sender = cfg.GetRequiredService<INotificationSender>();
+                var observer = new AppointmentObserver(sender);
+                var subject = new AppointmentSubject();
+                subject.Attach(observer);
+                return subject;
+            });
 
             services.Configure<AdminNotificationsOptions>(cfg =>
             {

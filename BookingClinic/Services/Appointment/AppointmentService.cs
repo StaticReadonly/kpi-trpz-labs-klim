@@ -1,5 +1,6 @@
 ﻿using BookingClinic.Data.Repositories.AppointmentRepository;
 using BookingClinic.Data.Repositories.UserRepository;
+using BookingClinic.Services.AppointmentObserver.Subject;
 using BookingClinic.Services.Data.Appointment;
 using BookingClinic.Services.Data.Doctor;
 using Mapster;
@@ -10,15 +11,18 @@ namespace BookingClinic.Services.Appointment
 {
     public class AppointmentService : IAppointmentService
     {
+        private readonly IAppointmentSubject _appointmentSubject;
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IUserRepository _userRepository;
 
         public AppointmentService(
-            IAppointmentRepository appointmentRepository, 
-            IUserRepository userRepository)
+            IAppointmentRepository appointmentRepository,
+            IUserRepository userRepository,
+            IAppointmentSubject appointmentSubject)
         {
             _appointmentRepository = appointmentRepository;
             _userRepository = userRepository;
+            _appointmentSubject = appointmentSubject;
         }
 
         public async Task<ServiceResult<object>> CreateAppointment(MakeAppointmentDto dto, ClaimsPrincipal principal)
@@ -51,6 +55,7 @@ namespace BookingClinic.Services.Appointment
                     new List<ServiceError>() { ServiceError.AppointmentAlreadyExists() });
             }
 
+            var user = _userRepository.GetById(id)!;
             var appointment = new BookingClinic.Data.Entities.Appointment()
             {
                 Id = Guid.NewGuid(),
@@ -66,6 +71,7 @@ namespace BookingClinic.Services.Appointment
             try
             {
                 await _appointmentRepository.SaveChangesAsync();
+                await _appointmentSubject.NotifyAsync(appointment, user.Email);
 
                 return ServiceResult<object>.Success(null);
             }
@@ -106,6 +112,7 @@ namespace BookingClinic.Services.Appointment
                     new List<ServiceError>() { ServiceError.AppointmentAlreadyExists() });
             }
 
+            var user = _userRepository.GetById(dto.PatientId)!;
             var appointment = new BookingClinic.Data.Entities.Appointment()
             {
                 Id = Guid.NewGuid(),
@@ -121,6 +128,7 @@ namespace BookingClinic.Services.Appointment
             try
             {
                 await _appointmentRepository.SaveChangesAsync();
+                await _appointmentSubject.NotifyAsync(appointment, user.Email);
 
                 return ServiceResult<object>.Success(null);
             }
@@ -153,8 +161,11 @@ namespace BookingClinic.Services.Appointment
             return ServiceResult<List<DoctorAppointmentDto>>.Success(appointments);
         }
 
-        public async Task<ServiceResult<object>> CancelAppointment(Guid appId)
+        public async Task<ServiceResult<object>> CancelAppointment(Guid appId, ClaimsPrincipal principal)
         {
+            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            var id = Guid.Parse(idClaim.Value);
+
             var appointment = _appointmentRepository.GetById(appId);
 
             if (appointment == null)
@@ -162,13 +173,20 @@ namespace BookingClinic.Services.Appointment
                 return ServiceResult<object>.Failure(
                     new List<ServiceError>() { ServiceError.AppointmentNotFound() });
             }
+            if (id != appointment.PatientId)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.AppointmentNotFound() });
+            }
 
             appointment.IsCanceled = true;
+            var user = _userRepository.GetById(id)!;
             _appointmentRepository.UpdateEntity(appointment);
 
             try
             {
                 await _appointmentRepository.SaveChangesAsync();
+                await _appointmentSubject.NotifyAsync(appointment, user.Email);
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)
@@ -178,8 +196,11 @@ namespace BookingClinic.Services.Appointment
             }
         }
 
-        public async Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto)
+        public async Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto, ClaimsPrincipal principal)
         {
+            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
+            var id = Guid.Parse(idClaim.Value);
+
             var appointment = _appointmentRepository.GetById(dto.Id);
 
             if (appointment == null)
@@ -187,7 +208,13 @@ namespace BookingClinic.Services.Appointment
                 return ServiceResult<object>.Failure(
                     new List<ServiceError>() { ServiceError.AppointmentNotFound() });
             }
+            if (appointment.DoctorId != id)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.AppointmentNotFound() });
+            }
 
+            var user = _userRepository.GetById(appointment.PatientId)!;
             appointment.IsFinished = true;
             appointment.Results = dto.Results;
             _appointmentRepository.UpdateEntity(appointment);
@@ -195,6 +222,7 @@ namespace BookingClinic.Services.Appointment
             try
             {
                 await _appointmentRepository.SaveChangesAsync();
+                await _appointmentSubject.NotifyAsync(appointment, user.Email);
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)

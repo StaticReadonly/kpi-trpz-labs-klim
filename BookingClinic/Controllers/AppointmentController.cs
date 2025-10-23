@@ -105,7 +105,7 @@ namespace BookingClinic.Controllers
         [Authorize("Doctors")]
         public async Task<IActionResult> FinishAppointment([FromForm] FinishAppointmentDto dto)
         {
-            var res = await _appointmentService.FinishAppointment(dto);
+            var res = await _appointmentService.FinishAppointment(dto, User);
 
             if (res.IsSuccess)
             {
@@ -122,7 +122,7 @@ namespace BookingClinic.Controllers
         [Authorize("PatientAppointment")]
         public async Task<IActionResult> CancelAppointment([FromQuery] Guid id)
         {
-            var res = await _appointmentService.CancelAppointment(id);
+            var res = await _appointmentService.CancelAppointment(id, User);
 
             if (res.IsSuccess)
             {

@@ -10,7 +10,7 @@ namespace BookingClinic.Services.Appointment
         Task<ServiceResult<object>> CreateAppointmentDoctor(MakeAppointmentDocDto dto, ClaimsPrincipal principal);
         ServiceResult<List<PatientAppointmentDto>> GetPatientAppointments(ClaimsPrincipal principal);
         ServiceResult<List<DoctorAppointmentDto>> GetDoctorAppointments(ClaimsPrincipal principal);
-        Task<ServiceResult<object>> CancelAppointment(Guid appId);
-        Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto);
+        Task<ServiceResult<object>> CancelAppointment(Guid appId, ClaimsPrincipal principal);
+        Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto, ClaimsPrincipal principal);
     }
 }
