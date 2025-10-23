@@ -1,5 +1,4 @@
-﻿
-using BookingClinic.Services.NotificationService;
+﻿using BookingClinic.Services.NotificationService;
 
 namespace BookingClinic.Services.AppointmentObserver.Observer
 {

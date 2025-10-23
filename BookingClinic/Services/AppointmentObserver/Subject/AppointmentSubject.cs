@@ -5,7 +5,6 @@ namespace BookingClinic.Services.AppointmentObserver.Subject
     public class AppointmentSubject : IAppointmentSubject
     {
         private readonly object _sync = new();
-        private Tuple<BookingClinic.Data.Entities.Appointment, string>? _state = null;
         private readonly List<IAppointmentObserver> _observers;
 
         public AppointmentSubject()
@@ -31,8 +30,6 @@ namespace BookingClinic.Services.AppointmentObserver.Subject
 
         public async Task NotifyAsync(BookingClinic.Data.Entities.Appointment appointment, string email)
         {
-            _state = new Tuple<BookingClinic.Data.Entities.Appointment, string>(appointment, email);
-
             IAppointmentObserver[]? obs = null;
             lock (_sync)
             {
@@ -41,7 +38,7 @@ namespace BookingClinic.Services.AppointmentObserver.Subject
 
             foreach (var o in obs)
             {
-                await o.UpdateAsync(_state.Item1, _state.Item2);
+                await o.UpdateAsync(appointment, email);
             }
         }
     }
