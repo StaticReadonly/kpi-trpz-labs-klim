@@ -23,8 +23,10 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
             _dbSet.Where(a => a.PatientId == patientId)
                     .Include(a => a.Doctor).ThenInclude(d => d.Clinic);
 
-
         public IEnumerable<Appointment> GetPatientDoctorAppointments(Guid patientId, Guid doctorId) =>
             _context.Set<Appointment>().Where(a => a.DoctorId == doctorId && a.PatientId == patientId && a.IsFinished);
+
+        public IEnumerable<Appointment> GetUnfinishedAppointments(DateTime currentDate) =>
+            _context.Set<Appointment>().Where(a => a.DateTime.Date == currentDate.Date && !a.IsCanceled && !a.IsFinished);
     }
 }

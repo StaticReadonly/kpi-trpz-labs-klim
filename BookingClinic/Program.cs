@@ -1,5 +1,6 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
+using BookingClinic.Services.Appointment;
 using BookingClinic.Services.Extensions;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
@@ -36,6 +37,8 @@ namespace BookingClinic
 
             services.AddAppRepositories();
             services.AddAppServices();
+
+            services.AddHostedService<AppointmentBackgroundService>();
 
             services.AddScoped<IDoctorSorter, DoctorSorter>();
 

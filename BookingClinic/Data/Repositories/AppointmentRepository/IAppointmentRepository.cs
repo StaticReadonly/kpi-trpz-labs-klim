@@ -9,5 +9,6 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
         IEnumerable<Appointment> GetPatientDoctorAppointments(Guid patientId, Guid doctorId);
         IEnumerable<Appointment> GetPatientAppointments(Guid patientId);
         IEnumerable<Appointment> GetDoctorAppointments(Guid doctorId, DateTime currentDate);
+        IEnumerable<Appointment> GetUnfinishedAppointments(DateTime currentDate);
     }
 }
