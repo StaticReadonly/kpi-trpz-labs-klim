@@ -18,46 +18,46 @@ namespace BookingClinic.Services.Appointment
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            int attempts = 0;
-            while (!stoppingToken.IsCancellationRequested)
+            using var timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
+
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
+                _logger.LogInformation("Tick");
                 var now = DateTime.UtcNow;
 
-                if (now.Hour >= 22 && attempts < 5)
+                if (now.Hour < 22)
                 {
-                    attempts++;
-                    using (var scope = _serviceScopeFactory.CreateScope())
+                    continue;
+                }
+
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    IAppointmentRepository appRepo = scope.ServiceProvider.GetService<IAppointmentRepository>();
+
+                    var appointments = appRepo.GetUnfinishedAppointments(now).ToList();
+
+                    if (appointments.Count == 0)
                     {
-                        IAppointmentRepository appRepo = scope.ServiceProvider.GetService<IAppointmentRepository>();
+                        continue;
+                    }
 
-                        var appointments = appRepo.GetUnfinishedAppointments(now).ToList();
+                    foreach (var a in appointments)
+                    {
+                        a.IsCanceled = true;
+                        appRepo.UpdateEntity(a);
+                    }
 
-                        foreach (var a in appointments)
+                    try
+                    {
+                        if (appointments.Count != 0)
                         {
-                            a.IsCanceled = true;
-                            appRepo.UpdateEntity(a);
-                        }
-
-                        try
-                        {
-                            if (appointments.Count != 0)
-                            {
-                                await appRepo.SaveChangesAsync();
-                            }
-                        }
-                        catch (Exception exc)
-                        {
-                            _logger.LogError(exc, "Error while trying to cancel unfinished appointments");
+                            await appRepo.SaveChangesAsync();
                         }
                     }
-                }
-                else if (now.Hour < 22)
-                {
-                    attempts = 0;
-                }
-                else
-                {
-                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                    catch (Exception exc)
+                    {
+                        _logger.LogError(exc, "Error while trying to cancel unfinished appointments");
+                    }
                 }
             }
         }

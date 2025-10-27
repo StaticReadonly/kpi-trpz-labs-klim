@@ -1,6 +1,7 @@
 using BookingClinic.Data.AppContext;
 using BookingClinic.Data.Extensions;
 using BookingClinic.Services.Appointment;
+using BookingClinic.Services.Doctor.Facade;
 using BookingClinic.Services.Extensions;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
@@ -40,6 +41,7 @@ namespace BookingClinic
 
             services.AddHostedService<AppointmentBackgroundService>();
 
+            services.AddScoped<ISearchDoctorFacade, SearchDoctorFacade>();
             services.AddScoped<IDoctorSorter, DoctorSorter>();
 
             services.Configure<DoctorSortingOptions>(cfg =>
