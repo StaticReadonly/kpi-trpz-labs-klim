@@ -35,7 +35,7 @@ namespace BookingClinic.Services.Doctor.Facade
             _docSortingStrategies = docSortingStrategies.Value.Strategies;
         }
 
-        public SearchDoctorIndexResult SearchFordoctors(SearchDoctorDto dto, int page)
+        public SearchDoctorIndexResult SearchForDoctors(SearchDoctorDto dto, int page)
         {
             var doctorsRes = _userService.SearchDoctors(dto);
             var specialitiesRes = _specialityService.GetSpecialityNames();

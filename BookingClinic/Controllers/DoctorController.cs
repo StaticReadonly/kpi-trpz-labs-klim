@@ -1,22 +1,14 @@
 ﻿using BookingClinic.Services;
 using BookingClinic.Services.Appointment;
-using BookingClinic.Services.Clinic;
 using BookingClinic.Services.Data.Appointment;
 using BookingClinic.Services.Data.Doctor;
 using BookingClinic.Services.Doctor;
 using BookingClinic.Services.Doctor.Facade;
-using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
-using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
-using BookingClinic.Services.Helpers.PaginationHelper;
 using BookingClinic.Services.Helpers.ReviewsHelper;
-using BookingClinic.Services.Options;
-using BookingClinic.Services.Speciality;
-using BookingClinic.Services.UserService;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BookingClinic.Controllers
@@ -24,45 +16,27 @@ namespace BookingClinic.Controllers
     [Route("doctors")]
     public class DoctorController : Controller
     {
-        private readonly IUserService _userService;
-        private readonly ISpecialityService _specialityService;
-        private readonly IClinicService _clinicService;
         private readonly IDoctorService _doctorService;
         private readonly IAppointmentService _appointmentService;
-        private readonly IPaginationHelper<SearchDoctorResDto> _paginationHelper;
         private readonly IReviewsHelper _reviewsHelper;
-        private readonly IDoctorSorter _doctorSorter;
-        private readonly Dictionary<string, IDoctorSorterStrategy> _docSortingStrategies;
         private readonly ISearchDoctorFacade _searchDoctorFacade;
 
         public DoctorController(
-            IUserService userService,
-            IPaginationHelper<SearchDoctorResDto> paginationHelper,
-            ISpecialityService specialityService,
-            IClinicService clinicService,
             IDoctorService doctorService,
             IAppointmentService appointmentService,
             IReviewsHelper reviewsHelper,
-            IDoctorSorter doctorSorter,
-            IOptions<DoctorSortingOptions> docSortingStrategies,
             ISearchDoctorFacade searchDoctorFacade)
         {
-            _userService = userService;
-            _paginationHelper = paginationHelper;
-            _specialityService = specialityService;
-            _clinicService = clinicService;
             _doctorService = doctorService;
             _appointmentService = appointmentService;
             _reviewsHelper = reviewsHelper;
-            _doctorSorter = doctorSorter;
-            _docSortingStrategies = docSortingStrategies.Value.Strategies;
             _searchDoctorFacade = searchDoctorFacade;
         }
 
         [HttpGet]
         public IActionResult Index([FromQuery] SearchDoctorDto dto, [FromQuery] int page)
         {
-            var res = _searchDoctorFacade.SearchFordoctors(dto, page);
+            var res = _searchDoctorFacade.SearchForDoctors(dto, page);
 
             ViewData["Specialities"] = res.Specialities;
             ViewData["Clinics"] = res.Clinics;

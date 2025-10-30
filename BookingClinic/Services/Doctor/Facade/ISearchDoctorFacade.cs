@@ -4,6 +4,6 @@ namespace BookingClinic.Services.Doctor.Facade
 {
     public interface ISearchDoctorFacade
     {
-        SearchDoctorIndexResult SearchFordoctors(SearchDoctorDto dto, int page);
+        SearchDoctorIndexResult SearchForDoctors(SearchDoctorDto dto, int page);
     }
 }
