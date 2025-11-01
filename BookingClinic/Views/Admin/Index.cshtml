@@ -1,0 +1,10 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Manage";
+}
+
+<div>
+    <form asp-controller="Admin" asp-action="GeneratePdfUsers" method="post">
+        <button type="submit">Generate report</button>
+    </form>
+</div>
