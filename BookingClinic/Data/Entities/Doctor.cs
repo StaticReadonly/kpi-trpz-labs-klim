@@ -1,4 +1,6 @@
-﻿namespace BookingClinic.Data.Entities
+﻿using BookingClinic.Services.Visitor;
+
+namespace BookingClinic.Data.Entities
 {
     public class Doctor : UserBase
     {
@@ -8,5 +10,10 @@
         public Speciality Speciality { get; set; }
         public Guid ClinicId { get; set; }
         public Clinic Clinic { get; set; }
+
+        public override void AcceptVisitor(IUserVisitor visitor)
+        {
+            visitor.VisitDoctor(this);
+        }
     }
 }

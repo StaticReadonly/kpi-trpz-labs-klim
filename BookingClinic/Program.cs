@@ -7,9 +7,11 @@ using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
 using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
 using BookingClinic.Services.Mapper;
 using BookingClinic.Services.Options;
+using BookingClinic.Services.Visitor;
 using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -19,6 +21,8 @@ namespace BookingClinic
     {
         public static void Main(string[] args)
         {
+            QuestPDF.Settings.License = LicenseType.Community;
+
             var builder = WebApplication.CreateBuilder(args);
             var services = builder.Services;
             var config = builder.Configuration;
@@ -40,6 +44,9 @@ namespace BookingClinic
             services.AddAppServices();
 
             services.AddHostedService<AppointmentBackgroundService>();
+
+            services.AddScoped<UserExportService>();
+            services.AddScoped<IVisitorFactory, VisitorFactory>();
 
             services.AddScoped<ISearchDoctorFacade, SearchDoctorFacade>();
             services.AddScoped<IDoctorSorter, DoctorSorter>();

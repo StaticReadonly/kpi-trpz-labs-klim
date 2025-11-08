@@ -1,5 +1,4 @@
-﻿
-using BookingClinic.Data.Repositories.AppointmentRepository;
+﻿using BookingClinic.Data.Repositories.AppointmentRepository;
 
 namespace BookingClinic.Services.Appointment
 {
