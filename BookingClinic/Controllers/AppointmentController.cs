@@ -32,7 +32,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpGet]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public IActionResult Index([FromQuery] int page)
         {
             if (TempData["Errors"] != null)
@@ -81,7 +81,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpGet("finishedApp")]
-        [Authorize("Doctors")]
+        [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
         public IActionResult FinishedAppointment([FromQuery] Guid patientId)
         {
             var docId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value;
@@ -102,7 +102,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost("finish")]
-        [Authorize("Doctors")]
+        [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
         public async Task<IActionResult> FinishAppointment([FromForm] FinishAppointmentDto dto)
         {
             var res = await _appointmentService.FinishAppointment(dto);
@@ -119,7 +119,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost("cancel")]
-        [Authorize("PatientAppointment")]
+        [Authorize(AuthorizationPolicies.PatientOnlyPolicy)]
         public async Task<IActionResult> CancelAppointment([FromQuery] Guid id)
         {
             var res = await _appointmentService.CancelAppointment(id);

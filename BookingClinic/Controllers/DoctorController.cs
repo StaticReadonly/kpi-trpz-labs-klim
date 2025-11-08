@@ -85,7 +85,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> MakeAppointment(
             [FromForm] MakeAppointmentDto dto)
         {
@@ -100,7 +100,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost("docApp")]
-        [Authorize("Doctors")]
+        [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
         public async Task<IActionResult> MakeAppointmentDoctor(
             [FromForm] MakeAppointmentDocDto dto)
         {

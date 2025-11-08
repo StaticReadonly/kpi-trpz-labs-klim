@@ -39,7 +39,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.PatientOnlyPolicy)]
         public async Task<IActionResult> CreateReview([FromForm] AddReviewDto dto)
         {
             var validationRes = _addReviewValidator.Validate(dto);

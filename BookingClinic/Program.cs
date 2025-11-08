@@ -77,31 +77,10 @@ namespace BookingClinic
 
             services.AddAuthorization(cfg =>
             {
-                cfg.AddPolicy("AuthUser", cfg =>
-                {
-                    cfg.RequireAuthenticatedUser();
-                });
-                cfg.AddPolicy("Patients", cfg =>
-                {
-                    cfg.RequireAuthenticatedUser()
-                        .RequireRole("Patient");
-                });
-                cfg.AddPolicy("Doctors", cfg =>
-                {
-                    cfg.RequireAuthenticatedUser()
-                        .RequireRole("Doctor");
-                });
-                cfg.AddPolicy("Admin", cfg =>
-                {
-                    cfg.RequireAuthenticatedUser()
-                        .RequireRole("Admin");
-                });
-                cfg.AddPolicy("PatientAppointment", cfg =>
-                {
-                    cfg.RequireAuthenticatedUser()
-                        .RequireRole("Patient", "Admin")
-                        .AddRequirements();
-                });
+                AuthorizationPolicies.BuildPatientOnlyPolicy(cfg);
+                AuthorizationPolicies.BuildDoctorOnlyPolicy(cfg);
+                AuthorizationPolicies.BuildAdminOnlyPolicy(cfg);
+                AuthorizationPolicies.BuildUserOnlyPolicy(cfg);
             });
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

@@ -32,7 +32,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpGet]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> Index()
         {
             if (TempData["Errors"] != null)
@@ -128,7 +128,7 @@ namespace BookingClinic.Controllers
 
 
         [HttpPost]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task <IActionResult> UpdateUser([FromForm] UserPageDataUpdateDto newData)
         {
             var validationRes = _userDataValidator.Validate(newData);
@@ -153,7 +153,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost("ppc")]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> ProfilePicture([FromForm] IFormFile image)
         {
             var res = await _userService.UpdateUserPhoto(image, User);
@@ -170,7 +170,7 @@ namespace BookingClinic.Controllers
         }
 
         [HttpPost("logout")]
-        [Authorize("AuthUser")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();
