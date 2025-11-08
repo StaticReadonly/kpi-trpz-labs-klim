@@ -1,21 +1,14 @@
 ﻿using BookingClinic.Services;
 using BookingClinic.Services.Appointment;
-using BookingClinic.Services.Clinic;
 using BookingClinic.Services.Data.Appointment;
 using BookingClinic.Services.Data.Doctor;
 using BookingClinic.Services.Doctor;
-using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
-using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
-using BookingClinic.Services.Helpers.PaginationHelper;
+using BookingClinic.Services.Doctor.Facade;
 using BookingClinic.Services.Helpers.ReviewsHelper;
-using BookingClinic.Services.Options;
-using BookingClinic.Services.Speciality;
-using BookingClinic.Services.UserService;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace BookingClinic.Controllers
@@ -23,80 +16,37 @@ namespace BookingClinic.Controllers
     [Route("doctors")]
     public class DoctorController : Controller
     {
-        private readonly IUserService _userService;
-        private readonly ISpecialityService _specialityService;
-        private readonly IClinicService _clinicService;
         private readonly IDoctorService _doctorService;
         private readonly IAppointmentService _appointmentService;
-        private readonly IPaginationHelper<SearchDoctorResDto> _paginationHelper;
         private readonly IReviewsHelper _reviewsHelper;
-        private readonly IDoctorSorter _doctorSorter;
-        private readonly Dictionary<string, IDoctorSorterStrategy> _docSortingStrategies;
+        private readonly ISearchDoctorFacade _searchDoctorFacade;
 
         public DoctorController(
-            IUserService userService,
-            IPaginationHelper<SearchDoctorResDto> paginationHelper,
-            ISpecialityService specialityService,
-            IClinicService clinicService,
             IDoctorService doctorService,
             IAppointmentService appointmentService,
             IReviewsHelper reviewsHelper,
-            IDoctorSorter doctorSorter,
-            IOptions<DoctorSortingOptions> docSortingStrategies)
+            ISearchDoctorFacade searchDoctorFacade)
         {
-            _userService = userService;
-            _paginationHelper = paginationHelper;
-            _specialityService = specialityService;
-            _clinicService = clinicService;
             _doctorService = doctorService;
             _appointmentService = appointmentService;
             _reviewsHelper = reviewsHelper;
-            _doctorSorter = doctorSorter;
-            _docSortingStrategies = docSortingStrategies.Value.Strategies;
+            _searchDoctorFacade = searchDoctorFacade;
         }
 
         [HttpGet]
         public IActionResult Index([FromQuery] SearchDoctorDto dto, [FromQuery] int page)
         {
-            var res = _userService.SearchDoctors(dto);
-            var specialities = _specialityService.GetSpecialityNames();
-            var clinics = _clinicService.GetClinicNames();
+            var res = _searchDoctorFacade.SearchForDoctors(dto, page);
 
-            if (specialities.IsSuccess)
-            {
-                ViewData["Specialities"] = specialities.Result;
-            }
+            ViewData["Specialities"] = res.Specialities;
+            ViewData["Clinics"] = res.Clinics;
+            ViewData["Sortings"] = res.Sortings;
+            ViewData["Page"] = res.Page;
+            ViewData["Pages"] = res.Pages;
+            ViewData["Doctors"] = res.Doctors;
+            ViewData["Errors"] = res.Errors;
 
-            if (clinics.IsSuccess)
-            {
-                ViewData["Clinics"] = clinics.Result;
-            }
-
-            ViewData["Sortings"] = _docSortingStrategies.Keys.ToList();
-            ViewData["Page"] = page;
-
-            if (res.IsSuccess)
-            {
-                _doctorSorter.SetStrategy(dto.OrderBy);
-
-                var orderDoctors = _doctorSorter.Sort(res.Result!);
-
-                var doctors = _paginationHelper.Paginate(orderDoctors, page, 5, out var pages);
-
-                ViewData["Pages"] = pages;
-                ViewData["Doctors"] = doctors;
-
-                return View(dto);
-            }
-            else
-            {
-                ViewData["Page"] = 1;
-                ViewData["Pages"] = new List<int> { 1 };
-                ViewData["Errors"] = res.Errors;
-                ViewData["Doctors"] = new List<SearchDoctorResDto>() { };
-
-                return View(dto);
-            }
+            return View(dto);
         }
 
         [HttpGet("{id:guid}")]
