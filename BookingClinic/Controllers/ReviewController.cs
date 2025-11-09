@@ -1,6 +1,9 @@
-﻿using BookingClinic.Services;
-using BookingClinic.Services.Data.Review;
-using BookingClinic.Services.Review;
+﻿//using BookingClinic.Services;
+//using BookingClinic.Services.Data.Review;
+//using BookingClinic.Services.Review;
+using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Data.Review;
+using BookingClinic.Application.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

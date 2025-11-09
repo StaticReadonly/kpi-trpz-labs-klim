@@ -9,7 +9,7 @@ namespace BookingClinic.Data.Extensions
 {
     public static class AppRepositoriesExtensions
     {
-        public static IServiceCollection AddAppRepositories(this IServiceCollection services)
+        public static IServiceCollection AddAppRepositories2(this IServiceCollection services)
         {
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IClinicRepository, ClinicRepository>();

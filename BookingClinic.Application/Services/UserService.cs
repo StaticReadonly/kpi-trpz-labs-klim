@@ -206,6 +206,7 @@ namespace BookingClinic.Application.Services
             var name = userPicture.FileName;
             var idx = name.LastIndexOf('.');
             var newName = Guid.NewGuid().ToString() + name.Substring(idx);
+            userPicture.FileName = newName;
 
             var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
             var userId = userIdClaim!.Value;

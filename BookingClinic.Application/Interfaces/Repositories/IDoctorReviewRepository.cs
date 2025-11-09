@@ -1,5 +1,4 @@
-﻿using BookingClinic.Data.Repositories.Abstraction;
-using BookingClinic.Domain.Entities;
+﻿using BookingClinic.Domain.Entities;
 
 namespace BookingClinic.Application.Interfaces.Repositories
 {

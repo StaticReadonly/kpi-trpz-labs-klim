@@ -1,4 +1,4 @@
-﻿using BookingClinic.Infrastructure.Helpers.DoctorSorterHelper;
+﻿using BookingClinic.Application.Helpers;
 
 namespace BookingClinic.Infrastructure.Options
 {

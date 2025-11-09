@@ -1,6 +1,10 @@
-﻿using BookingClinic.Services;
-using BookingClinic.Services.Data.User;
-using BookingClinic.Services.UserService;
+﻿//using BookingClinic.Services;
+//using BookingClinic.Services.Data.User;
+//using BookingClinic.Services.UserService;
+using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Data.User;
+using BookingClinic.Application.Common;
+
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
@@ -156,7 +160,9 @@ namespace BookingClinic.Controllers
         [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> ProfilePicture([FromForm] IFormFile image)
         {
-            var res = await _userService.UpdateUserPhoto(image, User);
+            using var stream = image.OpenReadStream();
+            var newImageModel = new UserPictureDto(image.FileName, stream);
+            var res = await _userService.UpdateUserPhoto(newImageModel, User);
 
             if (res.IsSuccess)
             {

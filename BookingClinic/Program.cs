@@ -1,16 +1,4 @@
-using BookingClinic.Data.AppContext;
-using BookingClinic.Data.Extensions;
-using BookingClinic.Services.Appointment;
-using BookingClinic.Services.Doctor.Facade;
-using BookingClinic.Services.Extensions;
-using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorter;
-using BookingClinic.Services.Helpers.DoctorsSortingHelper.DoctorSorterStrategies;
-using BookingClinic.Services.Mapper;
-using BookingClinic.Services.Options;
-using BookingClinic.Services.Visitor;
-using FluentValidation;
-using Mapster;
-using Microsoft.EntityFrameworkCore;
+using BookingClinic.Infrastructure.Extensions;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -32,32 +20,39 @@ namespace BookingClinic
                     opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
 
-            services.AddDbContext<ApplicationContext>(cfg =>
-            {
-                cfg.UseNpgsql(config.GetConnectionString("Main"));
-            });
-
             services.AddAppRepositories();
             services.AddAppServices();
+            services.AddAppBackgroundService();
+            services.AddAppDbContext(config);
+            services.AddAppHelpers();
+            services.AddAppOptions();
 
-            services.AddHostedService<AppointmentBackgroundService>();
+            //services.AddDbContext<ApplicationContext>(cfg =>
+            //{
+            //    cfg.UseNpgsql(config.GetConnectionString("Main"));
+            //});
 
-            services.AddScoped<UserExportService>();
-            services.AddScoped<IVisitorFactory, VisitorFactory>();
+            //services.AddAppRepositories();
+            //services.AddAppServices();
 
-            services.AddScoped<ISearchDoctorFacade, SearchDoctorFacade>();
-            services.AddScoped<IDoctorSorter, DoctorSorter>();
+            //services.AddHostedService<AppointmentBackgroundService>();
 
-            services.Configure<DoctorSortingOptions>(cfg =>
-            {
-                cfg.Strategies = new Dictionary<string, IDoctorSorterStrategy>();
-                var strats = cfg.Strategies;
+            //services.AddScoped<UserExportService>();
+            //services.AddScoped<IVisitorFactory, VisitorFactory>();
 
-                strats["Name Asc"] = new SortByNameAscStrategy();
-                strats["Name Desc"] = new SortByNameDescStrategy();
-            });
+            //services.AddScoped<ISearchDoctorFacade, SearchDoctorFacade>();
+            //services.AddScoped<IDoctorSorter, DoctorSorter>();
 
-            services.AddMapster();
+            //services.Configure<DoctorSortingOptions>(cfg =>
+            //{
+            //    cfg.Strategies = new Dictionary<string, IDoctorSorterStrategy>();
+            //    var strats = cfg.Strategies;
+
+            //    strats["Name Asc"] = new SortByNameAscStrategy();
+            //    strats["Name Desc"] = new SortByNameDescStrategy();
+            //});
+
+            //services.AddMapster();
             services.AddAuthentication()
                 .AddCookie("Cookie", cfg =>
                 {
@@ -80,8 +75,8 @@ namespace BookingClinic
                 AuthorizationPolicies.BuildUserOnlyPolicy(cfg);
             });
 
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            MapperConfigs.RegisterMappings();
+            //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            //MapperConfigs.RegisterMappings();
 
             var app = builder.Build();
 

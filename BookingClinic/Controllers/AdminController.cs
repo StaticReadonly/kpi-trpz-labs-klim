@@ -1,16 +1,16 @@
-﻿using BookingClinic.Services.Visitor;
+﻿using BookingClinic.Application.Interfaces.Visitor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingClinic.Controllers
 {
     [Route("manage")]
-    [Authorize("Admin")]
+    [Authorize(AuthorizationPolicies.AdminOnlyPolicy)]
     public class AdminController : Controller
     {
-        private readonly UserExportService _userExportService;
+        private readonly IUserExportService _userExportService;
 
-        public AdminController(UserExportService userExportService)
+        public AdminController(IUserExportService userExportService)
         {
             _userExportService = userExportService;
         }

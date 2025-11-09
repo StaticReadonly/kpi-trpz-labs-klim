@@ -11,7 +11,7 @@ namespace BookingClinic.Services.Extensions
 {
     public static class AppServicesExtensions
     {
-        public static IServiceCollection AddAppServices(this IServiceCollection services)
+        public static IServiceCollection AddAppServices2(this IServiceCollection services)
         {
             services.AddScoped(typeof(IPaginationHelper<>), typeof(PaginationHelper<>));
             services.AddScoped<IAppointmentHelper, AppointmentHelper>();
