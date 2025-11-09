@@ -226,13 +226,6 @@ namespace BookingClinic.Application.Services
 
             try
             {
-                //var wwwrootPath = _hostEnvironment.WebRootPath;
-
-                //var path = Path.Combine(wwwrootPath, "profiles", "users", newName);
-
-                //using var newFile = File.Create(path);
-                //await userPicture.CopyToAsync(newFile);
-
                 await _fileStorage.SaveUserPhotoAsync(userPicture, userIdGuid);
 
                 await _userRepository.SaveChangesAsync();

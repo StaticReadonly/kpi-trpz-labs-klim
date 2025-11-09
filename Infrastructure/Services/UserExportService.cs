@@ -28,9 +28,9 @@ namespace BookingClinic.Infrastructure.Services
 
 
             using IUserVisitor visitor = _visitorFactory.CreatePDFVisitor(path);
-            var patients = _userRepository.GetVisitorPatients().Adapt<IEnumerable<VisitableModelBase>>();
-            var doctors = _userRepository.GetVisitorDoctors().Adapt<IEnumerable<VisitableModelBase>>();
-            var admins = _userRepository.GetVisitorAdmins().Adapt<IEnumerable<VisitableModelBase>>();
+            var patients = _userRepository.GetVisitorPatients().Adapt<IEnumerable<VisitablePatientModel>>();
+            var doctors = _userRepository.GetVisitorDoctors().Adapt<IEnumerable<VisitableDoctorModel>>();
+            var admins = _userRepository.GetVisitorAdmins().Adapt<IEnumerable<VisitableAdminModel>>();
             var users = new List<VisitableModelBase>();
 
             users.AddRange(admins);

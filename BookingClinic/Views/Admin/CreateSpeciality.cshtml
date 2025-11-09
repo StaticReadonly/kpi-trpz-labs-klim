@@ -1,0 +1,22 @@
+@model BookingClinic.Application.Data.Admin.SpecialityAdminDto
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Create speciality";
+}
+
+<h2>Create speciality</h2>
+
+@if (TempData["Errors"] != null)
+{
+    <div class="alert alert-danger">@TempData["Errors"]</div>
+}
+
+<form method="post" asp-controller="Admin" asp-action="CreateSpecialityPost">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-secondary" asp-controller="Admin" asp-action="Specialities">Cancel</a>
+</form>

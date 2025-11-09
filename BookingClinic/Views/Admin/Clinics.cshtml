@@ -1,0 +1,47 @@
+@model IEnumerable<BookingClinic.Application.Data.Admin.ClinicAdminDto>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Clinics";
+}
+
+<h2>Clinics</h2>
+
+@if (TempData["Errors"] != null)
+{
+    <div class="alert alert-danger">@TempData["Errors"]</div>
+}
+
+<p><a class="btn btn-primary" asp-controller="Admin" asp-action="CreateClinic">Create clinic</a></p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>City</th>
+            <th>Street</th>
+            <th>Building</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Name</td>
+                <td>@c.City</td>
+                <td>@c.Street</td>
+                <td>@c.Building</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="Admin"
+                       asp-action="EditClinic"
+                       asp-route-id="@c.Id">Edit</a>
+                    <form method="post" asp-controller="Admin"
+                          asp-action="DeleteClinic"
+                          asp-route-id="@c.Id" style="display:inline;">
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete clinic?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

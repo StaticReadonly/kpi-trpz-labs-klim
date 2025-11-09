@@ -2,9 +2,23 @@
 @{
     ViewData["Title"] = "Manage";
 }
+<h1>Admin manage view</h1>
 
-<div>
-    <form asp-controller="Admin" asp-action="GeneratePdfUsers" method="post">
-        <button type="submit">Generate report</button>
+<div class="mb-3">
+    <a class="btn btn-primary" asp-controller="Admin" asp-action="Users">Users</a>
+    <a class="btn btn-secondary" asp-controller="Admin" asp-action="Clinics">Clinics</a>
+    <a class="btn btn-secondary" asp-controller="Admin" asp-action="Specialities">Specialities</a>
+</div>
+
+<div class="mb-3">
+    <form method="post" asp-controller="Admin" asp-action="GeneratePdfUsers" class="d-inline">
+        <button type="submit" class="btn btn-outline-dark">Generate users PDF</button>
     </form>
 </div>
+
+@if (TempData["Errors"] != null)
+{
+    <div class="alert alert-danger mt-3">
+        @TempData["Errors"]
+    </div>
+}

@@ -1,0 +1,89 @@
+@model BookingClinic.Application.Data.Admin.UserAdminDto
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Edit user";
+    var clinics = ViewData["Clinics"] as IEnumerable<BookingClinic.Application.Data.Admin.ClinicAdminDto>;
+    var specs = ViewData["Specialities"] as IEnumerable<BookingClinic.Application.Data.Admin.SpecialityAdminDto>;
+}
+
+<h2>Edit user</h2>
+
+@if (TempData["Errors"] != null)
+{
+    <div class="alert alert-danger">@TempData["Errors"]</div>
+}
+
+<form method="post" asp-controller="Admin" asp-action="EditUserPost">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Surname" class="form-label"></label>
+        <input asp-for="Surname" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Phone" class="form-label"></label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ConfirmPassword" class="form-label"></label>
+        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Clinic (for Doctor)</label>
+        @if (clinics != null)
+        {
+            <select name="ClinicId" class="form-select">
+                <option value="">No clinic</option>
+                @foreach (var c in clinics)
+                {
+                    <option value="@c.Id" selected="@(Model.ClinicId == c.Id)">@c.Name</option>
+                }
+            </select>
+        }
+        else
+        {
+            <input name="ClinicId" value="@(Model.ClinicId?.ToString() ?? "")" class="form-control" placeholder="Clinic GUID" />
+        }
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Speciality (for Doctor)</label>
+        @if (specs != null)
+        {
+            <select name="SpecialityId" class="form-select">
+                <option value="">No speciality</option>
+                @foreach (var s in specs)
+                {
+                    <option value="@s.Id" selected="@(Model.SpecialityId == s.Id)">@s.Name</option>
+                }
+            </select>
+        }
+        else
+        {
+            <input name="SpecialityId" value="@(Model.SpecialityId?.ToString() ?? "")" class="form-control" placeholder="Speciality GUID" />
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a class="btn btn-secondary" asp-controller="Admin" asp-action="Users">Cancel</a>
+</form>

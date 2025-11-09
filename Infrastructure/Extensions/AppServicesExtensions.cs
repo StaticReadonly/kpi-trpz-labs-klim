@@ -27,6 +27,7 @@ namespace BookingClinic.Infrastructure.Extensions
             services.AddScoped<IDoctorService, DoctorService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<IAdminService, AdminService>();
 
             services.AddScoped<ISearchDoctorFacade, SearchDoctorFacade>();
             services.AddScoped<IVisitorFactory, VisitorFactory>();

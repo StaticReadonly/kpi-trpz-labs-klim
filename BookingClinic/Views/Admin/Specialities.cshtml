@@ -1,0 +1,41 @@
+@model IEnumerable<BookingClinic.Application.Data.Admin.SpecialityAdminDto>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Specialities";
+}
+
+<h2>Specialities</h2>
+
+@if (TempData["Errors"] != null)
+{
+    <div class="alert alert-danger">@TempData["Errors"]</div>
+}
+
+<p><a class="btn btn-primary" asp-controller="Admin" asp-action="CreateSpeciality">Create speciality</a></p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td>@s.Name</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="Admin"
+                       asp-action="EditSpeciality"
+                       asp-route-id="@s.Id">Edit</a>
+                    <form method="post" asp-controller="Admin"
+                          asp-action="DeleteSpeciality"
+                          asp-route-id="@s.Id" style="display:inline;">
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete speciality?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
