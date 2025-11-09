@@ -1,9 +1,4 @@
-﻿//using BookingClinic.Services;
-//using BookingClinic.Services.Appointment;
-//using BookingClinic.Services.Data.Appointment;
-//using BookingClinic.Services.Doctor;
-//using BookingClinic.Services.Helpers.PaginationHelper;
-using BookingClinic.Application.Interfaces.Services;
+﻿using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Common;

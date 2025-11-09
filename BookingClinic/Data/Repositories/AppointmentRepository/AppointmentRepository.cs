@@ -7,7 +7,7 @@ namespace BookingClinic.Data.Repositories.AppointmentRepository
 {
     public class AppointmentRepository : RepositoryBase<Appointment, Guid>, IAppointmentRepository
     {
-        public AppointmentRepository(ApplicationContext context) 
+        public AppointmentRepository(ApplicationContext2 context) 
             : base(context)
         {
         }

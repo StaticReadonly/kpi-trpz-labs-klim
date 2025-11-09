@@ -7,7 +7,7 @@ namespace BookingClinic.Data.Repositories.DoctorReviewRepository
 {
     public class DoctorReviewRepository : RepositoryBase<DoctorReview, Guid>, IDoctorReviewRepository
     {
-        public DoctorReviewRepository(ApplicationContext context) 
+        public DoctorReviewRepository(ApplicationContext2 context) 
             : base(context)
         {
         }

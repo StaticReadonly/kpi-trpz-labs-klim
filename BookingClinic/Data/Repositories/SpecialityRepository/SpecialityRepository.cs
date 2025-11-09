@@ -6,7 +6,7 @@ namespace BookingClinic.Data.Repositories.SpecialityRepository
 {
     public class SpecialityRepository : RepositoryBase<Speciality, Guid>, ISpecialityRepository
     {
-        public SpecialityRepository(ApplicationContext context) 
+        public SpecialityRepository(ApplicationContext2 context) 
             : base(context)
         {
         }

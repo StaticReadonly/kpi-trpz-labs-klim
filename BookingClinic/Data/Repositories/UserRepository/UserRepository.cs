@@ -7,7 +7,7 @@ namespace BookingClinic.Data.Repositories.UserRepository
 {
     public class UserRepository : RepositoryBase<UserBase, Guid>, IUserRepository
     {
-        public UserRepository(ApplicationContext context) 
+        public UserRepository(ApplicationContext2 context) 
             : base(context)
         {
         }

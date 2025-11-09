@@ -5,10 +5,10 @@ namespace BookingClinic.Data.Repositories.Abstraction
 {
     public class RepositoryBase<T, TKey> : IRepository<T, TKey> where T : class
     {
-        protected readonly ApplicationContext _context;
+        protected readonly ApplicationContext2 _context;
         protected readonly DbSet<T> _dbSet;
 
-        public RepositoryBase(ApplicationContext context)
+        public RepositoryBase(ApplicationContext2 context)
         {
             _context = context;
             _dbSet = _context.Set<T>();

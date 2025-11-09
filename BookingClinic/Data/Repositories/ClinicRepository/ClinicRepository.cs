@@ -6,7 +6,7 @@ namespace BookingClinic.Data.Repositories.ClinicRepository
 {
     public class ClinicRepository : RepositoryBase<Clinic, Guid>, IClinicRepository
     {
-        public ClinicRepository(ApplicationContext context)
+        public ClinicRepository(ApplicationContext2 context)
             : base(context)
         {
 

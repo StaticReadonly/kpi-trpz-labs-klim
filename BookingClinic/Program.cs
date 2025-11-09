@@ -27,32 +27,6 @@ namespace BookingClinic
             services.AddAppHelpers();
             services.AddAppOptions();
 
-            //services.AddDbContext<ApplicationContext>(cfg =>
-            //{
-            //    cfg.UseNpgsql(config.GetConnectionString("Main"));
-            //});
-
-            //services.AddAppRepositories();
-            //services.AddAppServices();
-
-            //services.AddHostedService<AppointmentBackgroundService>();
-
-            //services.AddScoped<UserExportService>();
-            //services.AddScoped<IVisitorFactory, VisitorFactory>();
-
-            //services.AddScoped<ISearchDoctorFacade, SearchDoctorFacade>();
-            //services.AddScoped<IDoctorSorter, DoctorSorter>();
-
-            //services.Configure<DoctorSortingOptions>(cfg =>
-            //{
-            //    cfg.Strategies = new Dictionary<string, IDoctorSorterStrategy>();
-            //    var strats = cfg.Strategies;
-
-            //    strats["Name Asc"] = new SortByNameAscStrategy();
-            //    strats["Name Desc"] = new SortByNameDescStrategy();
-            //});
-
-            //services.AddMapster();
             services.AddAuthentication()
                 .AddCookie("Cookie", cfg =>
                 {
@@ -74,9 +48,6 @@ namespace BookingClinic
                 AuthorizationPolicies.BuildAdminOnlyPolicy(cfg);
                 AuthorizationPolicies.BuildUserOnlyPolicy(cfg);
             });
-
-            //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            //MapperConfigs.RegisterMappings();
 
             var app = builder.Build();
 

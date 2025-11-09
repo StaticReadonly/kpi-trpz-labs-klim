@@ -1,5 +1,4 @@
 ﻿using BookingClinic.Infrastructure.AppContext;
-using BookingClinic.Services.Appointment;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

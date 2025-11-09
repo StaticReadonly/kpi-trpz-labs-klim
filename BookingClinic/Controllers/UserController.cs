@@ -1,10 +1,6 @@
-﻿//using BookingClinic.Services;
-//using BookingClinic.Services.Data.User;
-//using BookingClinic.Services.UserService;
-using BookingClinic.Application.Interfaces.Services;
+﻿using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Data.User;
 using BookingClinic.Application.Common;
-
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;

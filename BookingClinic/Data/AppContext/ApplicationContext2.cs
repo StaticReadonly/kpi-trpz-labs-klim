@@ -3,9 +3,9 @@ using System.Reflection;
 
 namespace BookingClinic.Data.AppContext
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext2 : DbContext
     {
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
+        public ApplicationContext2(DbContextOptions<ApplicationContext2> options) : base(options)
         {
         }
 

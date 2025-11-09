@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BookingClinic.data.migrations
+namespace BookingClinic.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
     [Migration("20250928184000_UserBaseEmailPhoneUnqiue")]
