@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClinic", "BookingClinic\BookingClinic.csproj", "{91EFEC24-982D-401A-BECB-B810836C9B26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClinic.Web", "BookingClinic\BookingClinic.Web.csproj", "{91EFEC24-982D-401A-BECB-B810836C9B26}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 		Reports\Клим'юк В.Л. Лаб-4.pdf = Reports\Клим'юк В.Л. Лаб-4.pdf
 		Reports\Клим'юк В.Л. Лаб-5.pdf = Reports\Клим'юк В.Л. Лаб-5.pdf
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClinic.Domain", "BookingClinic.Domain\BookingClinic.Domain.csproj", "{ECBD7317-DABC-4E9C-BF7C-250CA6DF13BD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{8E23E9B8-E905-417F-8A79-E061440A038A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClinic.Application", "BookingClinic.Application\BookingClinic.Application.csproj", "{7C7148DA-C59D-4336-B7A0-D992B0B9B3AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{3CC0A55F-3BF8-4681-B5CC-8904B24F1DEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingClinic.Infrastructure", "Infrastructure\BookingClinic.Infrastructure.csproj", "{A95BDEB1-7563-4D86-A7B8-B24C6D77C47A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,9 +36,26 @@ Global
 		{91EFEC24-982D-401A-BECB-B810836C9B26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91EFEC24-982D-401A-BECB-B810836C9B26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91EFEC24-982D-401A-BECB-B810836C9B26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECBD7317-DABC-4E9C-BF7C-250CA6DF13BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECBD7317-DABC-4E9C-BF7C-250CA6DF13BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECBD7317-DABC-4E9C-BF7C-250CA6DF13BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECBD7317-DABC-4E9C-BF7C-250CA6DF13BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C7148DA-C59D-4336-B7A0-D992B0B9B3AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C7148DA-C59D-4336-B7A0-D992B0B9B3AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C7148DA-C59D-4336-B7A0-D992B0B9B3AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C7148DA-C59D-4336-B7A0-D992B0B9B3AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A95BDEB1-7563-4D86-A7B8-B24C6D77C47A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A95BDEB1-7563-4D86-A7B8-B24C6D77C47A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A95BDEB1-7563-4D86-A7B8-B24C6D77C47A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A95BDEB1-7563-4D86-A7B8-B24C6D77C47A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ECBD7317-DABC-4E9C-BF7C-250CA6DF13BD} = {36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}
+		{7C7148DA-C59D-4336-B7A0-D992B0B9B3AC} = {8E23E9B8-E905-417F-8A79-E061440A038A}
+		{A95BDEB1-7563-4D86-A7B8-B24C6D77C47A} = {3CC0A55F-3BF8-4681-B5CC-8904B24F1DEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EA3EB35-6EF7-42B6-AAA0-B286CFE169EB}

@@ -11,7 +11,6 @@ using BookingClinic.Services.Visitor;
 using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -21,8 +20,6 @@ namespace BookingClinic
     {
         public static void Main(string[] args)
         {
-            QuestPDF.Settings.License = LicenseType.Community;
-
             var builder = WebApplication.CreateBuilder(args);
             var services = builder.Services;
             var config = builder.Configuration;
