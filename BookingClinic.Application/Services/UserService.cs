@@ -2,8 +2,10 @@
 using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Data.User;
 using BookingClinic.Application.Interfaces;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Repositories;
 using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Entities;
 using Mapster;
 using System.Security.Claims;
@@ -14,21 +16,18 @@ namespace BookingClinic.Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ISpecialityRepository _specialityRepository;
-        private readonly IClinicRepository _clinicRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IFileStorage _fileStorage;
+        private readonly IUserContextHelper _userContextHelper;
 
         public UserService(
-            IUserRepository userRepository,
-            ISpecialityRepository specialityRepository,
-            IClinicRepository clinicRepository,
-            IFileStorage fileStorage)
+            IUnitOfWork unitOfWork,
+            IFileStorage fileStorage,
+            IUserContextHelper userContextHelper)
         {
-            _userRepository = userRepository;
-            _specialityRepository = specialityRepository;
-            _clinicRepository = clinicRepository;
-            _fileStorage = fileStorage;
+            this._unitOfWork = unitOfWork;
+            this._fileStorage = fileStorage;
+            this._userContextHelper = userContextHelper;
         }
 
         private string GetPasswordHash(UserBase user, string password)
@@ -58,18 +57,18 @@ namespace BookingClinic.Application.Services
         {
             try
             {
-                var doctors = _userRepository.GetSearchDoctors();
+                var doctors = _unitOfWork.Users.GetSearchDoctors();
 
                 if (!string.IsNullOrEmpty(dto.Speciality))
                 {
-                    var speciality = _specialityRepository.GetSpecialityByName(dto.Speciality);
+                    var speciality = _unitOfWork.Specialities.GetSpecialityByName(dto.Speciality);
 
                     doctors = doctors.Where(d => d.SpecialityId == speciality.Id);
                 }
 
                 if (!string.IsNullOrEmpty(dto.Clinic))
                 {
-                    var clinic = _clinicRepository.GetClinicByName(dto.Clinic);
+                    var clinic = _unitOfWork.Clinics.GetClinicByName(dto.Clinic);
 
                     doctors = doctors.Where(d => d.ClinicId == clinic.Id);
                 }
@@ -117,7 +116,7 @@ namespace BookingClinic.Application.Services
             UserBase? user;
             try
             {
-                user = _userRepository.GetUserByEmail(dto.Email);
+                user = _unitOfWork.Users.GetUserByEmail(dto.Email);
             }
             catch (Exception)
             {
@@ -146,7 +145,7 @@ namespace BookingClinic.Application.Services
 
         public async Task<ServiceResult<ClaimsPrincipal>> RegisterUser(RegisterUserDto dto)
         {
-            UserBase? existingUser = _userRepository.GetUserByEmail(dto.Email);
+            UserBase? existingUser = _unitOfWork.Users.GetUserByEmail(dto.Email);
 
             if (existingUser != null)
             {
@@ -165,11 +164,11 @@ namespace BookingClinic.Application.Services
             var passwordHash = GetPasswordHash(newUser, dto.Password);
             newUser.PasswordHash = passwordHash;
 
-            _userRepository.AddEntity(newUser);
+            _unitOfWork.Users.AddEntity(newUser);
 
             try
             {
-                await _userRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -184,17 +183,8 @@ namespace BookingClinic.Application.Services
 
         public ServiceResult<UserPageDataDto> GetUserData(ClaimsPrincipal userPrincipal)
         {
-            var idClaim = userPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-
-            if (idClaim == null)
-            {
-                return ServiceResult<UserPageDataDto>.Failure(
-                    new List<ServiceError>() { ServiceError.Unauthorized() });
-            }
-
-            Guid id = Guid.Parse(idClaim.Value);
-
-            var user = _userRepository.GetById(id);
+            var id = _userContextHelper.UserId!.Value;
+            var user = _unitOfWork.Users.GetById(id);
 
             var result = user.Adapt<UserPageDataDto>();
 
@@ -203,16 +193,14 @@ namespace BookingClinic.Application.Services
 
         public async Task<ServiceResult<object>> UpdateUserPhoto(UserPictureDto userPicture, ClaimsPrincipal principal)
         {
+            var id = _userContextHelper.UserId!.Value;
+
             var name = userPicture.FileName;
             var idx = name.LastIndexOf('.');
             var newName = Guid.NewGuid().ToString() + name.Substring(idx);
             userPicture.FileName = newName;
 
-            var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            var userId = userIdClaim!.Value;
-            var userIdGuid = Guid.Parse(userId);
-
-            var userEntity = _userRepository.GetById(userIdGuid);
+            var userEntity = _unitOfWork.Users.GetById(id);
 
             if (userEntity == null)
             {
@@ -222,18 +210,20 @@ namespace BookingClinic.Application.Services
 
             userEntity.ProfilePicture = newName;
 
-            _userRepository.UpdateEntity(userEntity);
+            var transaction = await _unitOfWork.BeginTransactionAsync();
+            _unitOfWork.Users.UpdateEntity(userEntity);
 
             try
             {
-                await _fileStorage.SaveUserPhotoAsync(userPicture, userIdGuid);
+                await _unitOfWork.SaveChangesAsync();
+                await _fileStorage.SaveUserPhotoAsync(userPicture, id);
 
-                await _userRepository.SaveChangesAsync();
-
+                await transaction.CommitAsync();
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)
             {
+                await transaction.RollbackAsync();
                 return ServiceResult<object>.Failure(
                     new List<ServiceError>() { ServiceError.UnexpectedError() });
             }
@@ -243,7 +233,7 @@ namespace BookingClinic.Application.Services
         {
             var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
             var userId = userIdClaim!.Value;
-            var user = _userRepository.GetById(Guid.Parse(userId));
+            var user = _unitOfWork.Users.GetById(Guid.Parse(userId));
             
             if (user == null)
             {
@@ -263,11 +253,11 @@ namespace BookingClinic.Application.Services
             user.Phone = dto.Phone;
             user.PasswordHash = GetPasswordHash(user, dto.Password);
 
-            _userRepository.UpdateEntity(user);
+            _unitOfWork.Users.UpdateEntity(user);
 
             try
             {
-                await _userRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 return ServiceResult<UserPageDataDto>.Success(user.Adapt<UserPageDataDto>());
             }
             //catch (DbUpdateException)

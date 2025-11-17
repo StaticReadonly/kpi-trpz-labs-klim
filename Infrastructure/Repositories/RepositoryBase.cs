@@ -25,8 +25,6 @@ namespace BookingClinic.Infrastructure.Repositories
 
         public T? GetById(TKey key) => _dbSet.Find(key);
 
-        public Task SaveChangesAsync() => _context.SaveChangesAsync();
-
         public void UpdateEntity(T entity) => _dbSet.Update(entity);
     }
 }

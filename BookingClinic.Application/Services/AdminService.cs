@@ -1,10 +1,9 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Admin;
-using BookingClinic.Application.Data.User;
-using BookingClinic.Application.Interfaces.Repositories;
 using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Entities;
-using System.Security.Claims;
+using Mapster;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -12,35 +11,29 @@ namespace BookingClinic.Application.Services
 {
     public class AdminService : IAdminService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IClinicRepository _clinicRepository;
-        private readonly ISpecialityRepository _specialityRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AdminService(
-            IUserRepository userRepository,
-            IClinicRepository clinicRepository,
-            ISpecialityRepository specialityRepository)
+            IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
-            _clinicRepository = clinicRepository;
-            _specialityRepository = specialityRepository;
+            this._unitOfWork = unitOfWork;
         }
 
         public IEnumerable<UserAdminDto> GetAllUsers()
         {
-            var users = _userRepository.GetAll();
-            return users.Select(MapToUserAdminDto).ToList();
+            var users = _unitOfWork.Users.GetAll();
+            return users.Adapt<IEnumerable<UserAdminDto>>();
         }
 
         public async Task<ServiceResult<UserAdminDto>> GetUserById(Guid id)
         {
             try
             {
-                var user = _userRepository.GetById(id);
+                var user = _unitOfWork.Users.GetById(id);
                 if (user == null)
                     return ServiceResult<UserAdminDto>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                return ServiceResult<UserAdminDto>.Success(MapToUserAdminDto(user));
+                return ServiceResult<UserAdminDto>.Success(user.Adapt<UserAdminDto>());
             }
             catch (Exception)
             {
@@ -55,7 +48,8 @@ namespace BookingClinic.Application.Services
                 if (dto.Id == null || dto.Id == Guid.Empty)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                var existing = _userRepository.GetById(dto.Id.Value);
+                
+                var existing = _unitOfWork.Users.GetById(dto.Id.Value);
                 if (existing == null)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
@@ -84,8 +78,8 @@ namespace BookingClinic.Application.Services
                         doc.SpecialityId = dto.SpecialityId.Value;
                 }
 
-                _userRepository.UpdateEntity(existing);
-                await _userRepository.SaveChangesAsync();
+                _unitOfWork.Users.UpdateEntity(existing);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -99,12 +93,12 @@ namespace BookingClinic.Application.Services
         {
             try
             {
-                var user = _userRepository.GetById(id);
+                var user = _unitOfWork.Users.GetById(id);
                 if (user == null)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                _userRepository.DeleteEntity(user);
-                await _userRepository.SaveChangesAsync();
+                _unitOfWork.Users.DeleteEntity(user);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -127,7 +121,7 @@ namespace BookingClinic.Application.Services
 
         public async Task<ServiceResult<object>> RegisterUser(UserAdminDto dto)
         {
-            UserBase? existingUser = _userRepository.GetUserByEmail(dto.Email);
+            UserBase? existingUser = _unitOfWork.Users.GetUserByEmail(dto.Email);
 
             if (existingUser != null)
             {
@@ -167,11 +161,11 @@ namespace BookingClinic.Application.Services
             var passwordHash = GetPasswordHash(newUser, dto.Password);
             newUser.PasswordHash = passwordHash;
 
-            _userRepository.AddEntity(newUser);
+            _unitOfWork.Users.AddEntity(newUser);
 
             try
             {
-                await _userRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -184,8 +178,8 @@ namespace BookingClinic.Application.Services
 
         public IEnumerable<ClinicAdminDto> GetAllClinics()
         {
-            var clinics = _clinicRepository.GetAll();
-            return clinics.Select(MapToClinicAdminDto).ToList();
+            var clinics = _unitOfWork.Clinics.GetAll();
+            return clinics.Adapt<IEnumerable<ClinicAdminDto>>();
         }
 
         public async Task<ServiceResult<object>> CreateClinic(ClinicAdminDto dto)
@@ -202,8 +196,8 @@ namespace BookingClinic.Application.Services
                     CreatedDate = DateTime.UtcNow
                 };
 
-                _clinicRepository.AddEntity(clinic);
-                await _clinicRepository.SaveChangesAsync();
+                _unitOfWork.Clinics.AddEntity(clinic);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -220,7 +214,7 @@ namespace BookingClinic.Application.Services
                 if (dto.Id == null || dto.Id == Guid.Empty)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                var existing = _clinicRepository.GetById(dto.Id.Value);
+                var existing = _unitOfWork.Clinics.GetById(dto.Id.Value);
                 if (existing == null)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
@@ -229,8 +223,8 @@ namespace BookingClinic.Application.Services
                 existing.Street = dto.Street;
                 existing.Building = dto.Building;
 
-                _clinicRepository.UpdateEntity(existing);
-                await _clinicRepository.SaveChangesAsync();
+                _unitOfWork.Clinics.UpdateEntity(existing);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -244,12 +238,12 @@ namespace BookingClinic.Application.Services
         {
             try
             {
-                var clinic = _clinicRepository.GetById(id);
+                var clinic = _unitOfWork.Clinics.GetById(id);
                 if (clinic == null)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                _clinicRepository.DeleteEntity(clinic);
-                await _clinicRepository.SaveChangesAsync();
+                _unitOfWork.Clinics.DeleteEntity(clinic);
+                await _unitOfWork.SaveChangesAsync();
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)
@@ -260,8 +254,8 @@ namespace BookingClinic.Application.Services
 
         public IEnumerable<SpecialityAdminDto> GetAllSpecialities()
         {
-            var specs = _specialityRepository.GetAll();
-            return specs.Select(MapToSpecialityAdminDto).ToList();
+            var specs = _unitOfWork.Specialities.GetAll();
+            return specs.Adapt<IEnumerable<SpecialityAdminDto>>();
         }
 
         public async Task<ServiceResult<object>> CreateSpeciality(SpecialityAdminDto dto)
@@ -274,8 +268,8 @@ namespace BookingClinic.Application.Services
                     Name = dto.Name
                 };
 
-                _specialityRepository.AddEntity(s);
-                await _specialityRepository.SaveChangesAsync();
+                _unitOfWork.Specialities.AddEntity(s);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -292,13 +286,13 @@ namespace BookingClinic.Application.Services
                 if (dto.Id == null || dto.Id == Guid.Empty)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                var existing = _specialityRepository.GetById(dto.Id.Value);
+                var existing = _unitOfWork.Specialities.GetById(dto.Id.Value);
                 if (existing == null)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
                 existing.Name = dto.Name;
-                _specialityRepository.UpdateEntity(existing);
-                await _specialityRepository.SaveChangesAsync();
+                _unitOfWork.Specialities.UpdateEntity(existing);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -312,12 +306,12 @@ namespace BookingClinic.Application.Services
         {
             try
             {
-                var s = _specialityRepository.GetById(id);
+                var s = _unitOfWork.Specialities.GetById(id);
                 if (s == null)
                     return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
 
-                _specialityRepository.DeleteEntity(s);
-                await _specialityRepository.SaveChangesAsync();
+                _unitOfWork.Specialities.DeleteEntity(s);
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -325,48 +319,6 @@ namespace BookingClinic.Application.Services
             {
                 return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
             }
-        }
-
-        private static UserAdminDto MapToUserAdminDto(UserBase u)
-        {
-            var dto = new UserAdminDto
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Surname = u.Surname,
-                Email = u.Email,
-                Phone = u.Phone,
-                Role = u.Role
-            };
-
-            if (u is Doctor d)
-            {
-                dto.ClinicId = d.ClinicId;
-                dto.SpecialityId = d.SpecialityId;
-            }
-
-            return dto;
-        }
-
-        private static ClinicAdminDto MapToClinicAdminDto(Clinic c)
-        {
-            return new ClinicAdminDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                City = c.City,
-                Street = c.Street,
-                Building = c.Building,
-            };
-        }
-
-        private static SpecialityAdminDto MapToSpecialityAdminDto(Speciality s)
-        {
-            return new SpecialityAdminDto
-            {
-                Id = s.Id,
-                Name = s.Name ?? string.Empty
-            };
         }
     }
 }

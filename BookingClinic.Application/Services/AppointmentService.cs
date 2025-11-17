@@ -1,8 +1,9 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Data.Doctor;
-using BookingClinic.Application.Interfaces.Repositories;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using Mapster;
 using System.Globalization;
 using System.Security.Claims;
@@ -11,23 +12,21 @@ namespace BookingClinic.Application.Services
 {
     public class AppointmentService : IAppointmentService
     {
-        private readonly IAppointmentRepository _appointmentRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserContextHelper _userContextHelper;
 
         public AppointmentService(
-            IAppointmentRepository appointmentRepository, 
-            IUserRepository userRepository)
+            IUnitOfWork unitOfWork,
+            IUserContextHelper userContextHelper)
         {
-            _appointmentRepository = appointmentRepository;
-            _userRepository = userRepository;
+            this._unitOfWork = unitOfWork;
+            this._userContextHelper = userContextHelper;
         }
 
         public async Task<ServiceResult<object>> CreateAppointment(MakeAppointmentDto dto, ClaimsPrincipal principal)
         {
-            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            var id = Guid.Parse(idClaim.Value);
-
-            var doctor = _userRepository.GetDoctorById(dto.DoctorId);
+            var id = _userContextHelper.UserId!.Value;
+            var doctor = _unitOfWork.Users.GetDoctorById(dto.DoctorId);
 
             if (doctor == null)
             {
@@ -44,7 +43,7 @@ namespace BookingClinic.Application.Services
             DateTime dateTime = DateTime.ParseExact(dto.AppointmentDay.Split(',')[1].Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
             dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
 
-            var app = _appointmentRepository.GetByDateTime(dateTime);
+            var app = _unitOfWork.Appointments.GetByDateTime(dateTime);
 
             if (app != null)
             {
@@ -62,11 +61,11 @@ namespace BookingClinic.Application.Services
                 Address = $"{clinic.Name}, {clinic.City} {clinic.Street} {clinic.Building}"
             };
 
-            _appointmentRepository.AddEntity(appointment);
+            _unitOfWork.Appointments.AddEntity(appointment);
 
             try
             {
-                await _appointmentRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -79,10 +78,14 @@ namespace BookingClinic.Application.Services
 
         public async Task<ServiceResult<object>> CreateAppointmentDoctor(MakeAppointmentDocDto dto, ClaimsPrincipal principal)
         {
-            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            var id = Guid.Parse(idClaim.Value);
+            if (!_userContextHelper.IsDoctor)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.Unauthorized() });
+            }
 
-            var doctor = _userRepository.GetDoctorById(id);
+            var id = _userContextHelper.UserId!.Value;
+            var doctor = _unitOfWork.Users.GetDoctorById(id);
 
             if (doctor == null)
             {
@@ -99,7 +102,7 @@ namespace BookingClinic.Application.Services
             DateTime dateTime = DateTime.ParseExact(dto.AppointmentDay.Split(',')[1].Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
             dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
 
-            var app = _appointmentRepository.GetByDateTime(dateTime);
+            var app = _unitOfWork.Appointments.GetByDateTime(dateTime);
 
             if (app != null)
             {
@@ -117,11 +120,11 @@ namespace BookingClinic.Application.Services
                 Address = $"{clinic.Name}, {clinic.City} {clinic.Street} {clinic.Building}"
             };
 
-            _appointmentRepository.AddEntity(appointment);
+            _unitOfWork.Appointments.AddEntity(appointment);
 
             try
             {
-                await _appointmentRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -134,10 +137,9 @@ namespace BookingClinic.Application.Services
 
         public ServiceResult<List<PatientAppointmentDto>> GetPatientAppointments(ClaimsPrincipal principal)
         {
-            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            Guid id = Guid.Parse(idClaim.Value);
+            var id = _userContextHelper.UserId!.Value;
 
-            var res = _appointmentRepository.GetPatientAppointments(id).ToList();
+            var res = _unitOfWork.Appointments.GetPatientAppointments(id).ToList();
 
             var appointments = res.Adapt<List<PatientAppointmentDto>>();
             return ServiceResult<List<PatientAppointmentDto>>.Success(appointments);
@@ -145,10 +147,9 @@ namespace BookingClinic.Application.Services
 
         public ServiceResult<List<DoctorAppointmentDto>> GetDoctorAppointments(ClaimsPrincipal principal)
         {
-            var idClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            Guid id = Guid.Parse(idClaim.Value);
+            var id = _userContextHelper.UserId!.Value;
 
-            var res = _appointmentRepository.GetDoctorAppointments(id, DateTime.UtcNow.Date);
+            var res = _unitOfWork.Appointments.GetDoctorAppointments(id, DateTime.UtcNow.Date);
 
             var appointments = res.Adapt<List<DoctorAppointmentDto>>();
             return ServiceResult<List<DoctorAppointmentDto>>.Success(appointments);
@@ -156,20 +157,21 @@ namespace BookingClinic.Application.Services
 
         public async Task<ServiceResult<object>> CancelAppointment(Guid appId)
         {
-            var appointment = _appointmentRepository.GetById(appId);
+            var id = _userContextHelper.UserId!.Value;
+            var appointment = _unitOfWork.Appointments.GetById(appId);
 
-            if (appointment == null)
+            if (appointment == null || (appointment.PatientId != id && !_userContextHelper.IsAdmin))
             {
                 return ServiceResult<object>.Failure(
                     new List<ServiceError>() { ServiceError.AppointmentNotFound() });
             }
 
             appointment.IsCanceled = true;
-            _appointmentRepository.UpdateEntity(appointment);
+            _unitOfWork.Appointments.UpdateEntity(appointment);
 
             try
             {
-                await _appointmentRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)
@@ -181,9 +183,10 @@ namespace BookingClinic.Application.Services
 
         public async Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto)
         {
-            var appointment = _appointmentRepository.GetById(dto.Id);
+            var id = _userContextHelper.UserId!.Value;
+            var appointment = _unitOfWork.Appointments.GetById(dto.Id);
 
-            if (appointment == null)
+            if (appointment == null || appointment.DoctorId != id)
             {
                 return ServiceResult<object>.Failure(
                     new List<ServiceError>() { ServiceError.AppointmentNotFound() });
@@ -191,11 +194,11 @@ namespace BookingClinic.Application.Services
 
             appointment.IsFinished = true;
             appointment.Results = dto.Results;
-            _appointmentRepository.UpdateEntity(appointment);
+            _unitOfWork.Appointments.UpdateEntity(appointment);
 
             try
             {
-                await _appointmentRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 return ServiceResult<object>.Success(null);
             }
             catch (Exception)

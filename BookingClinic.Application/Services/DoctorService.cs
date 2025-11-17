@@ -1,7 +1,7 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Doctor;
-using BookingClinic.Application.Interfaces.Repositories;
 using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Interfaces;
 using Mapster;
 
@@ -9,20 +9,20 @@ namespace BookingClinic.Application.Services
 {
     public class DoctorService : IDoctorService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IAppointmentDomainService _appointmentDomainService;
 
         public DoctorService(
-            IUserRepository userRepository, 
+            IUnitOfWork unitOfWork,
             IAppointmentDomainService appointmentDomainService)
         {
-            _userRepository = userRepository;
-            _appointmentDomainService = appointmentDomainService;
+            this._unitOfWork = unitOfWork;
+            this._appointmentDomainService = appointmentDomainService;
         }
 
         public ServiceResult<DoctorDataDto> GetDoctorData(Guid doctorId)
         {
-            var doctor = _userRepository.GetDoctorByIdWithAppClinicSpeciality(doctorId);
+            var doctor = _unitOfWork.Users.GetDoctorByIdWithAppClinicSpeciality(doctorId);
 
             if (doctor == null)
             {

@@ -26,7 +26,9 @@ namespace BookingClinic
             services.AddAppDbContext(config);
             services.AddAppHelpers();
             services.AddAppOptions();
+            services.AddAppUnitOfWork();
 
+            services.AddHttpContextAccessor();
             services.AddAuthentication()
                 .AddCookie("Cookie", cfg =>
                 {

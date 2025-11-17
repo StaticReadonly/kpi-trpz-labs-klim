@@ -1,4 +1,5 @@
-﻿using BookingClinic.Application.Data.Appointment;
+﻿using BookingClinic.Application.Data.Admin;
+using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Data.Review;
 using BookingClinic.Application.Data.Visitor;
@@ -41,6 +42,10 @@ namespace BookingClinic.Services.Mapper
                 .Map(dest => dest.AppointmetsCount, src => src.DoctorAppointments.Count)
                 .Map(dest => dest.FinishedAppointmentsCount, src => src.DoctorAppointments.Count(a => a.IsFinished))
                 .Map(dest => dest.CanceledAppointmentsCount, src => src.DoctorAppointments.Count(a => a.IsCanceled));
+
+            TypeAdapterConfig<Doctor, UserAdminDto>.NewConfig()
+                .Map(dest => dest.ClinicId, src => src.ClinicId)
+                .Map(dest => dest.SpecialityId, src => src.SpecialityId);
         }
     }
 }

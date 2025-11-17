@@ -1,4 +1,4 @@
-﻿using BookingClinic.Application.Interfaces.Repositories;
+﻿using BookingClinic.Application.Interfaces.UnitOfWork;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -34,9 +34,9 @@ namespace BookingClinic.Services.Appointment
 
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    IAppointmentRepository appRepo = scope.ServiceProvider.GetService<IAppointmentRepository>();
+                    IUnitOfWork unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                    var appointments = appRepo.GetUnfinishedAppointments(now).ToList();
+                    var appointments = unitOfWork.Appointments.GetUnfinishedAppointments(now).ToList();
 
                     if (appointments.Count == 0)
                     {
@@ -46,14 +46,14 @@ namespace BookingClinic.Services.Appointment
                     foreach (var a in appointments)
                     {
                         a.IsCanceled = true;
-                        appRepo.UpdateEntity(a);
+                        unitOfWork.Appointments.UpdateEntity(a);
                     }
 
                     try
                     {
                         if (appointments.Count != 0)
                         {
-                            await appRepo.SaveChangesAsync();
+                            await unitOfWork.SaveChangesAsync();
                         }
                     }
                     catch (Exception exc)

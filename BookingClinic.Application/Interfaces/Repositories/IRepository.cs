@@ -8,6 +8,5 @@
         void AddRange(IEnumerable<T> entities);
         void UpdateEntity(T entity);
         void DeleteEntity(T entity);
-        Task SaveChangesAsync();
     }
 }

@@ -1,7 +1,8 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Review;
-using BookingClinic.Application.Interfaces.Repositories;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Entities;
 using Mapster;
 using System.Security.Claims;
@@ -10,36 +11,41 @@ namespace BookingClinic.Application.Services
 {
     public class ReviewService : IReviewService
     {
-        private readonly IDoctorReviewRepository _reviewsRepository;
-        private readonly IUserRepository _usersRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserContextHelper _userContextHelper;
 
         public ReviewService(
-            IDoctorReviewRepository reviewsRepository, 
-            IUserRepository usersRepository)
+            IUnitOfWork unitOfWork,
+            IUserContextHelper userContextHelper)
         {
-            _reviewsRepository = reviewsRepository;
-            _usersRepository = usersRepository;
+            this._unitOfWork = unitOfWork;
+            this._userContextHelper = userContextHelper;
         }
 
         public async Task<ServiceResult<object>> CreateReview(AddReviewDto dto, ClaimsPrincipal principal)
         {
-            var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            var userId = Guid.Parse(userIdClaim!.Value);
+            var id = _userContextHelper.UserId!.Value;
+
+            if (!_userContextHelper.IsPatient || !_userContextHelper.IsAdmin)
+            {
+                return ServiceResult<object>.Failure(
+                    new List<ServiceError>() { ServiceError.Unauthorized() });
+            }
 
             DoctorReview rev = new()
             {
                 Id = Guid.NewGuid(),
                 DoctorId = dto.DoctorId,
-                PatientId = userId,
+                PatientId = id,
                 Rating = dto.Rating,
                 Text = dto.Text
             };
 
-            _reviewsRepository.AddEntity(rev);
+            _unitOfWork.DoctorReviews.AddEntity(rev);
 
             try
             {
-                await _reviewsRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult<object>.Success(null);
             }
@@ -52,7 +58,7 @@ namespace BookingClinic.Application.Services
 
         public ServiceResult<DoctorReviewsDto> GetDoctorReviews(Guid doctorId)
         {
-            var doctor = _usersRepository.GetById(doctorId);
+            var doctor = _unitOfWork.Users.GetById(doctorId);
 
             if (doctor == null)
             {
@@ -60,7 +66,7 @@ namespace BookingClinic.Application.Services
                     new List<ServiceError>() { ServiceError.DoctorNotFound() });
             }
 
-            var reviews = _reviewsRepository.GetDoctorsReviews(doctorId);
+            var reviews = _unitOfWork.DoctorReviews.GetDoctorsReviews(doctorId);
 
             var res = doctor.Adapt<DoctorReviewsDto>();
             res.Reviews = reviews.Adapt<IEnumerable<ReviewDataDto>>();
