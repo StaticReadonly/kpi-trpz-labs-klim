@@ -1,8 +1,7 @@
-﻿using BookingClinic.Application.Interfaces.Services;
-using BookingClinic.Application.Interfaces.Helpers;
-using BookingClinic.Application.Data.Doctor;
+﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Appointment;
-using BookingClinic.Application.Common;
+using BookingClinic.Application.Data.Doctor;
+using BookingClinic.Application.Interfaces.Services;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -79,7 +78,7 @@ namespace BookingClinic.Controllers
         public async Task<IActionResult> MakeAppointment(
             [FromForm] MakeAppointmentDto dto)
         {
-            var res = await _appointmentService.CreateAppointment(dto, User);
+            var res = await _appointmentService.CreateAppointment(dto);
 
             if (!res.IsSuccess)
             {
@@ -94,7 +93,7 @@ namespace BookingClinic.Controllers
         public async Task<IActionResult> MakeAppointmentDoctor(
             [FromForm] MakeAppointmentDocDto dto)
         {
-            var res = await _appointmentService.CreateAppointmentDoctor(dto, User);
+            var res = await _appointmentService.CreateAppointmentDoctor(dto);
 
             if (res.IsSuccess)
             {

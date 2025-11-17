@@ -41,7 +41,7 @@ namespace BookingClinic.Controllers
 
             if (User.IsInRole("Doctor"))
             {
-                var res = _appointmentService.GetDoctorAppointments(User);
+                var res = _appointmentService.GetDoctorAppointments();
 
                 if (res.IsSuccess)
                 {
@@ -60,7 +60,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                var res = _appointmentService.GetPatientAppointments(User);
+                var res = _appointmentService.GetPatientAppointments();
 
                 if (res.IsSuccess)
                 {

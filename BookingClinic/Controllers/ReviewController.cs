@@ -51,7 +51,7 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId});
             }
 
-            var res = await _reviewService.CreateReview(dto, User);
+            var res = await _reviewService.CreateReview(dto);
 
             if (res.IsSuccess)
             {

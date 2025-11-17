@@ -40,7 +40,7 @@ namespace BookingClinic.Controllers
                 ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
             }
 
-            var userData = _userService.GetUserData(User);
+            var userData = _userService.GetUserData();
 
             if (userData.IsSuccess)
             {
