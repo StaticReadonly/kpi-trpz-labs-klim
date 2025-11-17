@@ -1,20 +1,17 @@
 ﻿using BookingClinic.Application.Interfaces.Helpers;
-using BookingClinic.Application.Interfaces.Repositories;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using System.Security.Claims;
 
 namespace BookingClinic.Infrastructure.Helpers
 {
     public class ReviewsHelper : IReviewsHelper
     {
-        private readonly IDoctorReviewRepository _reviewRepository;
-        private readonly IAppointmentRepository _appointmentRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public ReviewsHelper(
-            IDoctorReviewRepository reviewRepository, 
-            IAppointmentRepository appointmentRepository)
+            IUnitOfWork unitOfWork)
         {
-            _reviewRepository = reviewRepository;
-            _appointmentRepository = appointmentRepository;
+            this._unitOfWork = unitOfWork;
         }
 
         public bool CanUserWriteReview(Guid doctorId, ClaimsPrincipal principal)
@@ -28,8 +25,8 @@ namespace BookingClinic.Infrastructure.Helpers
 
             var idValue = Guid.Parse(idClaim.Value);
 
-            var resHasReviews = !_reviewRepository.GetDoctorPatientReviews(doctorId, idValue).Any();
-            var resHasAppointments = _appointmentRepository.GetPatientDoctorAppointments(idValue, doctorId).Any();
+            var resHasReviews = !_unitOfWork.DoctorReviews.GetDoctorPatientReviews(doctorId, idValue).Any();
+            var resHasAppointments = _unitOfWork.Appointments.GetPatientDoctorAppointments(idValue, doctorId).Any();
 
             return resHasReviews && resHasAppointments;
         }

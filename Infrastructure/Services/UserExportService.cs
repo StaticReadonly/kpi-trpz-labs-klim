@@ -1,5 +1,5 @@
 ﻿using BookingClinic.Application.Data.Visitor;
-using BookingClinic.Application.Interfaces.Repositories;
+using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Application.Interfaces.Visitor;
 using Mapster;
 
@@ -7,15 +7,15 @@ namespace BookingClinic.Infrastructure.Services
 {
     public class UserExportService : IUserExportService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IVisitorFactory _visitorFactory;
         
 
         public UserExportService(
-            IUserRepository userRepository,
+            IUnitOfWork unitOfWork,
             IVisitorFactory visitorFactory)
         {
-            this._userRepository = userRepository;
+            this._unitOfWork = unitOfWork;
             this._visitorFactory = visitorFactory;
         }
 
@@ -28,9 +28,9 @@ namespace BookingClinic.Infrastructure.Services
 
 
             using IUserVisitor visitor = _visitorFactory.CreatePDFVisitor(path);
-            var patients = _userRepository.GetVisitorPatients().Adapt<IEnumerable<VisitablePatientModel>>();
-            var doctors = _userRepository.GetVisitorDoctors().Adapt<IEnumerable<VisitableDoctorModel>>();
-            var admins = _userRepository.GetVisitorAdmins().Adapt<IEnumerable<VisitableAdminModel>>();
+            var patients = _unitOfWork.Users.GetVisitorPatients().Adapt<IEnumerable<VisitablePatientModel>>();
+            var doctors = _unitOfWork.Users.GetVisitorDoctors().Adapt<IEnumerable<VisitableDoctorModel>>();
+            var admins = _unitOfWork.Users.GetVisitorAdmins().Adapt<IEnumerable<VisitableAdminModel>>();
             var users = new List<VisitableModelBase>();
 
             users.AddRange(admins);
