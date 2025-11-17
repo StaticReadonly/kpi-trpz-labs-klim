@@ -3,14 +3,11 @@ using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Data.User;
 using BookingClinic.Application.Interfaces;
 using BookingClinic.Application.Interfaces.Helpers;
-using BookingClinic.Application.Interfaces.Repositories;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Entities;
 using Mapster;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace BookingClinic.Application.Services
 {
@@ -19,26 +16,18 @@ namespace BookingClinic.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileStorage _fileStorage;
         private readonly IUserContextHelper _userContextHelper;
+        private readonly IPasswordHelper _passwordHelper;
 
         public UserService(
             IUnitOfWork unitOfWork,
             IFileStorage fileStorage,
-            IUserContextHelper userContextHelper)
+            IUserContextHelper userContextHelper,
+            IPasswordHelper passwordHelper)
         {
+            this._passwordHelper = passwordHelper;
             this._unitOfWork = unitOfWork;
             this._fileStorage = fileStorage;
             this._userContextHelper = userContextHelper;
-        }
-
-        private string GetPasswordHash(UserBase user, string password)
-        {
-            using var sha256 = SHA256.Create();
-            
-            var salt = user.Id.ToString() + user.Email + user.Phone;
-            var saltedPassword = $"{password}:{salt}";
-            var bytes = Encoding.UTF8.GetBytes(saltedPassword);
-            var hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
         }
 
         private ClaimsPrincipal CreateClaimsPrincipal(UserBase user)
@@ -130,9 +119,9 @@ namespace BookingClinic.Application.Services
                     new List<ServiceError>() { ServiceError.InvalidCredentials() });
             }
 
-            var hash = GetPasswordHash(user, dto.Password);
+            var check = _passwordHelper.CheckPasswordEquality(user, dto.Password);
 
-            if (user.PasswordHash != hash)
+            if (!check)
             {
                 return ServiceResult<ClaimsPrincipal>.Failure(
                     new List<ServiceError>() { ServiceError.InvalidCredentials() });
@@ -161,7 +150,7 @@ namespace BookingClinic.Application.Services
                 Email = dto.Email
             };
 
-            var passwordHash = GetPasswordHash(newUser, dto.Password);
+            var passwordHash = _passwordHelper.GetPasswordHash(newUser, dto.Password);
             newUser.PasswordHash = passwordHash;
 
             _unitOfWork.Users.AddEntity(newUser);
@@ -181,7 +170,7 @@ namespace BookingClinic.Application.Services
             return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
         }
 
-        public ServiceResult<UserPageDataDto> GetUserData(ClaimsPrincipal userPrincipal)
+        public ServiceResult<UserPageDataDto> GetUserData()
         {
             var id = _userContextHelper.UserId!.Value;
             var user = _unitOfWork.Users.GetById(id);
@@ -191,7 +180,7 @@ namespace BookingClinic.Application.Services
             return ServiceResult<UserPageDataDto>.Success(result);
         }
 
-        public async Task<ServiceResult<object>> UpdateUserPhoto(UserPictureDto userPicture, ClaimsPrincipal principal)
+        public async Task<ServiceResult<object>> UpdateUserPhoto(UserPictureDto userPicture)
         {
             var id = _userContextHelper.UserId!.Value;
 
@@ -229,11 +218,11 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public async Task<ServiceResult<UserPageDataDto>> UpdateUser(UserPageDataUpdateDto dto, ClaimsPrincipal principal)
+        public async Task<ServiceResult<UserPageDataDto>> UpdateUser(UserPageDataUpdateDto dto)
         {
-            var userIdClaim = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-            var userId = userIdClaim!.Value;
-            var user = _unitOfWork.Users.GetById(Guid.Parse(userId));
+            var id = _userContextHelper.UserId!.Value;
+
+            var user = _unitOfWork.Users.GetById(id);
             
             if (user == null)
             {
@@ -241,7 +230,9 @@ namespace BookingClinic.Application.Services
                     new List<ServiceError>() { ServiceError.Unauthorized() });
             }
 
-            if (GetPasswordHash(user, dto.Password) != user.PasswordHash)
+            var check = _passwordHelper.CheckPasswordEquality(user, dto.Password);
+
+            if (!check)
             {
                 return ServiceResult<UserPageDataDto>.Failure(
                     new List<ServiceError>() { ServiceError.InvalidPassword() });
@@ -251,7 +242,7 @@ namespace BookingClinic.Application.Services
             user.Surname = dto.Surname;
             user.Email = dto.Email;
             user.Phone = dto.Phone;
-            user.PasswordHash = GetPasswordHash(user, dto.Password);
+            user.PasswordHash = _passwordHelper.GetPasswordHash(user, dto.Password);
 
             _unitOfWork.Users.UpdateEntity(user);
 

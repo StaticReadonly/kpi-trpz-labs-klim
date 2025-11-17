@@ -139,7 +139,7 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("Index");
             }
 
-            var res = await _userService.UpdateUser(newData, User);
+            var res = await _userService.UpdateUser(newData);
 
             if (res.IsSuccess)
             {
@@ -158,7 +158,7 @@ namespace BookingClinic.Controllers
         {
             using var stream = image.OpenReadStream();
             var newImageModel = new UserPictureDto(image.FileName, stream);
-            var res = await _userService.UpdateUserPhoto(newImageModel, User);
+            var res = await _userService.UpdateUserPhoto(newImageModel);
 
             if (res.IsSuccess)
             {

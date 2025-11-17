@@ -22,7 +22,7 @@ namespace BookingClinic.Application.Services
             this._userContextHelper = userContextHelper;
         }
 
-        public async Task<ServiceResult<object>> CreateReview(AddReviewDto dto, ClaimsPrincipal principal)
+        public async Task<ServiceResult<object>> CreateReview(AddReviewDto dto)
         {
             var id = _userContextHelper.UserId!.Value;
 

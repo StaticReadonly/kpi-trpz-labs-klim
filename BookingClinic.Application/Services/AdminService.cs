@@ -1,22 +1,24 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Admin;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Entities;
 using Mapster;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace BookingClinic.Application.Services
 {
     public class AdminService : IAdminService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordHelper _passwordHelper;
 
         public AdminService(
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IPasswordHelper passwordHelper)
         {
             this._unitOfWork = unitOfWork;
+            this._passwordHelper = passwordHelper;
         }
 
         public IEnumerable<UserAdminDto> GetAllUsers()
@@ -65,7 +67,7 @@ namespace BookingClinic.Application.Services
                         return ServiceResult<object>.Failure(new List<ServiceError> { ServiceError.UnexpectedError() });
                     }
 
-                    var newHash = GetPasswordHash(existing, dto.Password);
+                    var newHash = _passwordHelper.GetPasswordHash(existing, dto.Password);
                     existing.PasswordHash = newHash;
                 }
 
@@ -108,17 +110,6 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        private string GetPasswordHash(UserBase user, string password)
-        {
-            using var sha256 = SHA256.Create();
-
-            var salt = user.Id.ToString() + user.Email + user.Phone;
-            var saltedPassword = $"{password}:{salt}";
-            var bytes = Encoding.UTF8.GetBytes(saltedPassword);
-            var hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);
-        }
-
         public async Task<ServiceResult<object>> RegisterUser(UserAdminDto dto)
         {
             UserBase? existingUser = _unitOfWork.Users.GetUserByEmail(dto.Email);
@@ -158,7 +149,7 @@ namespace BookingClinic.Application.Services
                 };
             }
 
-            var passwordHash = GetPasswordHash(newUser, dto.Password);
+            var passwordHash = _passwordHelper.GetPasswordHash(newUser, dto.Password);
             newUser.PasswordHash = passwordHash;
 
             _unitOfWork.Users.AddEntity(newUser);

@@ -23,7 +23,7 @@ namespace BookingClinic.Application.Services
             this._userContextHelper = userContextHelper;
         }
 
-        public async Task<ServiceResult<object>> CreateAppointment(MakeAppointmentDto dto, ClaimsPrincipal principal)
+        public async Task<ServiceResult<object>> CreateAppointment(MakeAppointmentDto dto)
         {
             var id = _userContextHelper.UserId!.Value;
             var doctor = _unitOfWork.Users.GetDoctorById(dto.DoctorId);
@@ -76,7 +76,7 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public async Task<ServiceResult<object>> CreateAppointmentDoctor(MakeAppointmentDocDto dto, ClaimsPrincipal principal)
+        public async Task<ServiceResult<object>> CreateAppointmentDoctor(MakeAppointmentDocDto dto)
         {
             if (!_userContextHelper.IsDoctor)
             {
@@ -135,7 +135,7 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public ServiceResult<List<PatientAppointmentDto>> GetPatientAppointments(ClaimsPrincipal principal)
+        public ServiceResult<List<PatientAppointmentDto>> GetPatientAppointments()
         {
             var id = _userContextHelper.UserId!.Value;
 
@@ -145,7 +145,7 @@ namespace BookingClinic.Application.Services
             return ServiceResult<List<PatientAppointmentDto>>.Success(appointments);
         }
 
-        public ServiceResult<List<DoctorAppointmentDto>> GetDoctorAppointments(ClaimsPrincipal principal)
+        public ServiceResult<List<DoctorAppointmentDto>> GetDoctorAppointments()
         {
             var id = _userContextHelper.UserId!.Value;
 

@@ -7,6 +7,6 @@ namespace BookingClinic.Application.Interfaces.Services
     public interface IReviewService
     {
         ServiceResult<DoctorReviewsDto> GetDoctorReviews(Guid doctorId);
-        Task<ServiceResult<object>> CreateReview(AddReviewDto dto, ClaimsPrincipal principal);
+        Task<ServiceResult<object>> CreateReview(AddReviewDto dto);
     }
 }
