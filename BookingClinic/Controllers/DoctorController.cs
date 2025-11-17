@@ -16,18 +16,15 @@ namespace BookingClinic.Controllers
     {
         private readonly IDoctorService _doctorService;
         private readonly IAppointmentService _appointmentService;
-        private readonly IReviewsHelper _reviewsHelper;
         private readonly ISearchDoctorFacade _searchDoctorFacade;
 
         public DoctorController(
             IDoctorService doctorService,
             IAppointmentService appointmentService,
-            IReviewsHelper reviewsHelper,
             ISearchDoctorFacade searchDoctorFacade)
         {
             _doctorService = doctorService;
             _appointmentService = appointmentService;
-            _reviewsHelper = reviewsHelper;
             _searchDoctorFacade = searchDoctorFacade;
         }
 
@@ -68,11 +65,6 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
-                if (User.IsInRole("Patient") || User.IsInRole("Admin"))
-                {
-                    res.Result!.CanWriteReview = _reviewsHelper.CanUserWriteReview(id, User);
-                }
-
                 return View(res.Result);
             }
             else
