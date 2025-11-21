@@ -14,6 +14,7 @@
         UserNotFound,
         UserIdCantBeEmpty,
         UserMustProvidePassword,
+        DoctorNotFound,
 
         //Clinic
         ClinicNotFound,

@@ -28,6 +28,9 @@
         public static ServiceError UserMustProvidePassword() =>
             new(ServiceErrorCodes.UserMustProvidePassword, "User must provide a password!");
 
+        public static ServiceError DoctorNotFound() =>
+            new(ServiceErrorCodes.DoctorNotFound, "Doctor not found!");
+
         // ======= Clinic Entity Errors =============
 
         public static ServiceError ClinicNotFound() =>
@@ -50,7 +53,11 @@
 
         // ======= Appointment Entity Errors =============
 
+        public static ServiceError AppointmentAlreadyExists() =>
+            new(ServiceErrorCodes.AppointmentAlreadyExists, "Appointment already exists!");
 
+        public static ServiceError AppointmentNotFound() =>
+            new(ServiceErrorCodes.AppointmentNotFound, "Appointment not found!");
 
         public override string ToString() => $"{Code}: {Message}";
     }

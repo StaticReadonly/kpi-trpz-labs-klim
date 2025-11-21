@@ -6,7 +6,6 @@ using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
 using Mapster;
 using System.Globalization;
-using System.Security.Claims;
 
 namespace BookingClinic.Application.Services
 {
@@ -23,15 +22,14 @@ namespace BookingClinic.Application.Services
             this._userContextHelper = userContextHelper;
         }
 
-        public async Task<ServiceResult<object>> CreateAppointment(MakeAppointmentDto dto)
+        public async Task<ServiceResult> CreateAppointment(MakeAppointmentDto dto)
         {
             var id = _userContextHelper.UserId!.Value;
             var doctor = _unitOfWork.Users.GetDoctorById(dto.DoctorId);
 
             if (doctor == null)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.DoctorNotFound() });
+                return ServiceResult.Failure(ServiceError.DoctorNotFound());
             }
 
             var clinic = doctor.Clinic;
@@ -47,8 +45,7 @@ namespace BookingClinic.Application.Services
 
             if (app != null)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.AppointmentAlreadyExists() });
+                return ServiceResult.Failure(ServiceError.AppointmentAlreadyExists());
             }
 
             var appointment = new Domain.Entities.Appointment()
@@ -67,21 +64,19 @@ namespace BookingClinic.Application.Services
             {
                 await _unitOfWork.SaveChangesAsync();
 
-                return ServiceResult<object>.Success(null);
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
             }
         }
 
-        public async Task<ServiceResult<object>> CreateAppointmentDoctor(MakeAppointmentDocDto dto)
+        public async Task<ServiceResult> CreateAppointmentDoctor(MakeAppointmentDocDto dto)
         {
             if (!_userContextHelper.IsDoctor)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.Unauthorized() });
+                return ServiceResult.Failure(ServiceError.Unauthorized());
             }
 
             var id = _userContextHelper.UserId!.Value;
@@ -89,8 +84,7 @@ namespace BookingClinic.Application.Services
 
             if (doctor == null)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.DoctorNotFound() });
+                return ServiceResult.Failure(ServiceError.DoctorNotFound());
             }
 
             var clinic = doctor.Clinic;
@@ -106,8 +100,7 @@ namespace BookingClinic.Application.Services
 
             if (app != null)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.AppointmentAlreadyExists() });
+                return ServiceResult.Failure(ServiceError.AppointmentAlreadyExists());
             }
 
             var appointment = new Domain.Entities.Appointment()
@@ -126,12 +119,11 @@ namespace BookingClinic.Application.Services
             {
                 await _unitOfWork.SaveChangesAsync();
 
-                return ServiceResult<object>.Success(null);
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
             }
         }
 
@@ -155,15 +147,14 @@ namespace BookingClinic.Application.Services
             return ServiceResult<List<DoctorAppointmentDto>>.Success(appointments);
         }
 
-        public async Task<ServiceResult<object>> CancelAppointment(Guid appId)
+        public async Task<ServiceResult> CancelAppointment(Guid appId)
         {
             var id = _userContextHelper.UserId!.Value;
             var appointment = _unitOfWork.Appointments.GetById(appId);
 
             if (appointment == null || (appointment.PatientId != id && !_userContextHelper.IsAdmin))
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.AppointmentNotFound() });
+                return ServiceResult.Failure(ServiceError.AppointmentNotFound());
             }
 
             appointment.IsCanceled = true;
@@ -172,24 +163,22 @@ namespace BookingClinic.Application.Services
             try
             {
                 await _unitOfWork.SaveChangesAsync();
-                return ServiceResult<object>.Success(null);
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
             }
         }
 
-        public async Task<ServiceResult<object>> FinishAppointment(FinishAppointmentDto dto)
+        public async Task<ServiceResult> FinishAppointment(FinishAppointmentDto dto)
         {
             var id = _userContextHelper.UserId!.Value;
             var appointment = _unitOfWork.Appointments.GetById(dto.Id);
 
             if (appointment == null || appointment.DoctorId != id)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.AppointmentNotFound() });
+                return ServiceResult.Failure(ServiceError.AppointmentNotFound());
             }
 
             appointment.IsFinished = true;
@@ -199,12 +188,11 @@ namespace BookingClinic.Application.Services
             try
             {
                 await _unitOfWork.SaveChangesAsync();
-                return ServiceResult<object>.Success(null);
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
             }
         }
     }
