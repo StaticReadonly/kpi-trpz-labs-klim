@@ -1,7 +1,6 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Data.Doctor;
-using System.Security.Claims;
 
 namespace BookingClinic.Application.Interfaces.Services
 {

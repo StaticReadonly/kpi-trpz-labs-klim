@@ -1,22 +1,27 @@
 ﻿namespace BookingClinic.Application.Common
 {
-    public class ServiceResult<T> where T : class
+    public class ServiceResult
     {
-        public T? Result { get; set; }
-        public bool IsSuccess { get; set; }
-        public ICollection<ServiceError> Errors { get; set; }
+        public IReadOnlyList<ServiceError> Errors { get; }
+        public bool IsSuccess => Errors.Count == 0;
 
-        protected ServiceResult(T? result, bool isSuccess, ICollection<ServiceError> erorrs)
+        protected ServiceResult(IReadOnlyList<ServiceError> errors) => Errors = errors ?? Array.Empty<ServiceError>();
+
+        public static ServiceResult Success() => new(Array.Empty<ServiceError>());
+        public static ServiceResult Failure(IEnumerable<ServiceError> errors) => new((errors ?? Array.Empty<ServiceError>()).ToArray());
+    }
+
+    public sealed class ServiceResult<T> : ServiceResult where T : class
+    {
+        public T? Result { get; }
+
+        private ServiceResult(T? result, IReadOnlyList<ServiceError> errors)
+            : base(errors)
         {
             Result = result;
-            IsSuccess = isSuccess;
-            Errors = erorrs;
         }
 
-        public static ServiceResult<T> Success(T? result) => 
-            new ServiceResult<T>(result, true, Array.Empty<ServiceError>());
-
-        public static ServiceResult<T> Failure(ICollection<ServiceError> errors) =>
-            new ServiceResult<T>(null, false, errors);
+        public static ServiceResult<T> Success(T? result) => new(result, Array.Empty<ServiceError>());
+        public new static ServiceResult<T> Failure(IEnumerable<ServiceError> errors) => new(null, (errors ?? Array.Empty<ServiceError>()).ToArray());
     }
 }

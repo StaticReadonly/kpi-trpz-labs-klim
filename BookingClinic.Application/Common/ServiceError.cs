@@ -1,40 +1,19 @@
 ﻿namespace BookingClinic.Application.Common
 {
-    public class ServiceError
+    public sealed record ServiceError(string Code, string Message)
     {
-        public string ErrorName { get; set; }
-        public string ErrorMessage { get; set; }
+        public static ServiceError Create(string code, string message) => new(code, message);
 
-        public ServiceError(string errorName, string errorMessage)
-        {
-            ErrorName = errorName;
-            ErrorMessage = errorMessage;
-        }
+        public static ServiceError UnexpectedError() => new("UnexpectedError", "Произошла непредвиденная ошибка.");
+        public static ServiceError InvalidReviewData() => new("InvalidReviewData", "Неверные данные отзыва.");
+        public static ServiceError UserAlreadyExists() => new("UserAlreadyExists", "Пользователь с такими данными уже существует.");
+        public static ServiceError InvalidCredentials() => new("InvalidCredentials", "Неверные учётные данные.");
+        public static ServiceError InvalidPassword() => new("InvalidPassword", "Неверный пароль.");
+        public static ServiceError Unauthorized() => new("Unauthorized", "Доступ запрещён.");
+        public static ServiceError DoctorNotFound() => new("DoctorNotFound", "Врач не найден.");
+        public static ServiceError AppointmentAlreadyExists() => new("AppointmentAlreadyExists", "Запись уже существует.");
+        public static ServiceError AppointmentNotFound() => new("AppointmentNotFound", "Запись не найдена.");
 
-        public static ServiceError UnexpectedError() =>
-            new("Unexpected error", "Some unexpected error happened");
-        public static ServiceError InvalidReviewData() =>
-            new("Review error", "Invalid review text or rating!");
-
-        public static ServiceError UserAlreadyExists() => 
-            new("User already exists", "User already exists");
-
-        public static ServiceError InvalidCredentials() =>
-            new("Invalid credentials", "Email or password incorrect");
-
-        public static ServiceError InvalidPassword() =>
-            new("Invalid password", "Password is invalid");
-
-        public static ServiceError Unauthorized() =>
-            new("User unauthorized", "User is unauthorized");
-
-        public static ServiceError DoctorNotFound() =>
-            new("Doctor not found", "Doctor not found");
-
-        public static ServiceError AppointmentAlreadyExists() =>
-            new("Appointment exists", "Appointment already exists");
-
-        public static ServiceError AppointmentNotFound() =>
-            new("Appointment doesn't exist", "Appointment doesn't exist");
+        public override string ToString() => $"{Code}: {Message}";
     }
 }
