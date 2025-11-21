@@ -33,8 +33,7 @@ namespace BookingClinic.Application.Services
 
             if (doctor == null)
             {
-                return ServiceResult<DoctorDataDto>.Failure(
-                    new List<ServiceError>() { ServiceError.DoctorNotFound() });
+                return ServiceResult<DoctorDataDto>.Failure(ServiceError.DoctorNotFound());
             }
 
             var res = doctor.Adapt<DoctorDataDto>();

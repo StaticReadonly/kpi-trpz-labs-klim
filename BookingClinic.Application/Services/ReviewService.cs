@@ -5,7 +5,6 @@ using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Domain.Entities;
 using Mapster;
-using System.Security.Claims;
 
 namespace BookingClinic.Application.Services
 {
@@ -22,14 +21,13 @@ namespace BookingClinic.Application.Services
             this._userContextHelper = userContextHelper;
         }
 
-        public async Task<ServiceResult<object>> CreateReview(AddReviewDto dto)
+        public async Task<ServiceResult> CreateReview(AddReviewDto dto)
         {
             var id = _userContextHelper.UserId!.Value;
 
             if (!_userContextHelper.IsPatient || !_userContextHelper.IsAdmin)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.Unauthorized() });
+                return ServiceResult.Failure(ServiceError.Unauthorized());
             }
 
             DoctorReview rev = new()
@@ -47,12 +45,11 @@ namespace BookingClinic.Application.Services
             {
                 await _unitOfWork.SaveChangesAsync();
 
-                return ServiceResult<object>.Success(null);
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
             }
         }
 
@@ -62,17 +59,23 @@ namespace BookingClinic.Application.Services
 
             if (doctor == null)
             {
-                return ServiceResult<DoctorReviewsDto>.Failure(
-                    new List<ServiceError>() { ServiceError.DoctorNotFound() });
+                return ServiceResult<DoctorReviewsDto>.Failure(ServiceError.DoctorNotFound());
             }
 
-            var reviews = _unitOfWork.DoctorReviews.GetDoctorsReviews(doctorId);
+            try
+            {
+                var reviews = _unitOfWork.DoctorReviews.GetDoctorsReviews(doctorId);
 
-            var res = doctor.Adapt<DoctorReviewsDto>();
-            res.Reviews = reviews.Adapt<IEnumerable<ReviewDataDto>>();
-            res.Rating = res.Reviews.Select(r => r.Rating).DefaultIfEmpty(0).Average();
+                var res = doctor.Adapt<DoctorReviewsDto>();
+                res.Reviews = reviews.Adapt<IEnumerable<ReviewDataDto>>();
+                res.Rating = res.Reviews.Select(r => r.Rating).DefaultIfEmpty(0).Average();
 
-            return ServiceResult<DoctorReviewsDto>.Success(res);
+                return ServiceResult<DoctorReviewsDto>.Success(res);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<DoctorReviewsDto>.Failure(ServiceError.UnexpectedError());
+            }
         }
     }
 }
