@@ -9,6 +9,7 @@
 
         public static ServiceResult Success() => new(Array.Empty<ServiceError>());
         public static ServiceResult Failure(IEnumerable<ServiceError> errors) => new((errors ?? Array.Empty<ServiceError>()).ToArray());
+        public static ServiceResult Failure(params ServiceError[] errors) => new((errors ?? Array.Empty<ServiceError>()).ToArray());
     }
 
     public sealed class ServiceResult<T> : ServiceResult where T : class
@@ -23,5 +24,6 @@
 
         public static ServiceResult<T> Success(T? result) => new(result, Array.Empty<ServiceError>());
         public new static ServiceResult<T> Failure(IEnumerable<ServiceError> errors) => new(null, (errors ?? Array.Empty<ServiceError>()).ToArray());
+        public new static ServiceResult<T> Failure(params ServiceError[] errors) => new(null, (errors ?? Array.Empty<ServiceError>()).ToArray());
     }
 }

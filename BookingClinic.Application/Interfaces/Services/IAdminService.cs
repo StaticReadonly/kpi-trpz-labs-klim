@@ -9,18 +9,18 @@ namespace BookingClinic.Application.Interfaces.Services
     {
         IEnumerable<UserAdminDto> GetAllUsers();
         Task<ServiceResult<UserAdminDto>> GetUserById(Guid id);
-        Task<ServiceResult<object>> UpdateUser(UserAdminDto user);
-        Task<ServiceResult<object>> DeleteUser(Guid id);
-        Task<ServiceResult<object>> RegisterUser(UserAdminDto dto);
+        Task<ServiceResult> UpdateUser(UserAdminDto user);
+        Task<ServiceResult> DeleteUser(Guid id);
+        Task<ServiceResult> RegisterUser(UserAdminDto dto);
 
         IEnumerable<ClinicAdminDto> GetAllClinics();
-        Task<ServiceResult<object>> CreateClinic(ClinicAdminDto clinic);
-        Task<ServiceResult<object>> UpdateClinic(ClinicAdminDto clinic);
-        Task<ServiceResult<object>> DeleteClinic(Guid id);
+        Task<ServiceResult> CreateClinic(ClinicAdminDto clinic);
+        Task<ServiceResult> UpdateClinic(ClinicAdminDto clinic);
+        Task<ServiceResult> DeleteClinic(Guid id);
 
         IEnumerable<SpecialityAdminDto> GetAllSpecialities();
-        Task<ServiceResult<object>> CreateSpeciality(SpecialityAdminDto speciality);
-        Task<ServiceResult<object>> UpdateSpeciality(SpecialityAdminDto speciality);
-        Task<ServiceResult<object>> DeleteSpeciality(Guid id);
+        Task<ServiceResult> CreateSpeciality(SpecialityAdminDto speciality);
+        Task<ServiceResult> UpdateSpeciality(SpecialityAdminDto speciality);
+        Task<ServiceResult> DeleteSpeciality(Guid id);
     }
 }
