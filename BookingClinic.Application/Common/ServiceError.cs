@@ -14,6 +14,9 @@
         public static ServiceError Unauthorized() => 
             new(ServiceErrorCodes.Unauthorized, "Action forbidden.");
 
+        public static ServiceError InvalidEmailOrPassword() =>
+            new(ServiceErrorCodes.InvalidEmailOrPassword, "Invalid email or password.");
+
         // ======= Users Entity Errors =============
 
         public static ServiceError UserAlreadyExists() =>

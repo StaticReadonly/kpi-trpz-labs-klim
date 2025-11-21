@@ -11,7 +11,7 @@ namespace BookingClinic.Application.Interfaces.Services
         ServiceResult<ClaimsPrincipal> LoginUser(LoginUserDto dto);
         Task<ServiceResult<ClaimsPrincipal>> RegisterUser(RegisterUserDto dto);
         ServiceResult<UserPageDataDto> GetUserData();
-        Task<ServiceResult<object>> UpdateUserPhoto(UserPictureDto file);
+        Task<ServiceResult> UpdateUserPhoto(UserPictureDto file);
         Task<ServiceResult<UserPageDataDto>> UpdateUser(UserPageDataUpdateDto dto);
     }
 }

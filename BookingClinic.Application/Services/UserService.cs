@@ -52,14 +52,20 @@ namespace BookingClinic.Application.Services
                 {
                     var speciality = _unitOfWork.Specialities.GetSpecialityByName(dto.Speciality);
 
-                    doctors = doctors.Where(d => d.SpecialityId == speciality.Id);
+                    if (speciality != null)
+                    {
+                        doctors = doctors.Where(d => d.SpecialityId == speciality.Id);
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(dto.Clinic))
                 {
                     var clinic = _unitOfWork.Clinics.GetClinicByName(dto.Clinic);
 
-                    doctors = doctors.Where(d => d.ClinicId == clinic.Id);
+                    if (clinic != null)
+                    {
+                        doctors = doctors.Where(d => d.ClinicId == clinic.Id);
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(dto.Query))
@@ -95,92 +101,95 @@ namespace BookingClinic.Application.Services
             }
             catch(Exception)
             {
-                return ServiceResult<IEnumerable<SearchDoctorResDto>>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult<IEnumerable<SearchDoctorResDto>>.Failure(ServiceError.UnexpectedError());
             }
         }
 
         public ServiceResult<ClaimsPrincipal> LoginUser(LoginUserDto dto)
         {
-            UserBase? user;
             try
             {
-                user = _unitOfWork.Users.GetUserByEmail(dto.Email);
+                var user = _unitOfWork.Users.GetUserByEmail(dto?.Email ?? string.Empty);
+
+                if (user == null)
+                {
+                    return ServiceResult<ClaimsPrincipal>.Failure(ServiceError.InvalidEmailOrPassword());
+                }
+
+                var check = _passwordHelper.CheckPasswordEquality(user, dto?.Password ?? string.Empty);
+
+                if (!check)
+                {
+                    return ServiceResult<ClaimsPrincipal>.Failure(ServiceError.InvalidEmailOrPassword());
+                }
+
+                var claimsPrincipal = CreateClaimsPrincipal(user);
+
+                return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
             }
             catch (Exception)
             {
-                return ServiceResult<ClaimsPrincipal>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult<ClaimsPrincipal>.Failure(ServiceError.UnexpectedError());
             }
-
-            if (user == null)
-            {
-                return ServiceResult<ClaimsPrincipal>.Failure(
-                    new List<ServiceError>() { ServiceError.InvalidCredentials() });
-            }
-
-            var check = _passwordHelper.CheckPasswordEquality(user, dto.Password);
-
-            if (!check)
-            {
-                return ServiceResult<ClaimsPrincipal>.Failure(
-                    new List<ServiceError>() { ServiceError.InvalidCredentials() });
-            }
-
-            var claimsPrincipal = CreateClaimsPrincipal(user);
-
-            return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
         }
 
         public async Task<ServiceResult<ClaimsPrincipal>> RegisterUser(RegisterUserDto dto)
         {
-            UserBase? existingUser = _unitOfWork.Users.GetUserByEmail(dto.Email);
-
-            if (existingUser != null)
-            {
-                return ServiceResult<ClaimsPrincipal>.Failure(
-                    new List<ServiceError>() { ServiceError.UserAlreadyExists() });
-            }
-
-            Patient newUser = new()
-            {
-                Id = Guid.NewGuid(),
-                Name = dto.Name,
-                Surname = dto.Surname,
-                Email = dto.Email
-            };
-
-            var passwordHash = _passwordHelper.GetPasswordHash(newUser, dto.Password);
-            newUser.PasswordHash = passwordHash;
-
-            _unitOfWork.Users.AddEntity(newUser);
-
             try
             {
+                UserBase? existingUser = _unitOfWork.Users.GetUserByEmail(dto?.Email ?? string.Empty);
+
+                if (existingUser != null)
+                {
+                    return ServiceResult<ClaimsPrincipal>.Failure(ServiceError.UserAlreadyExists());
+                }
+
+                Patient newUser = new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = dto.Name,
+                    Surname = dto.Surname,
+                    Email = dto.Email
+                };
+
+                var passwordHash = _passwordHelper.GetPasswordHash(newUser, dto?.Password ?? string.Empty);
+                newUser.PasswordHash = passwordHash;
+
+                _unitOfWork.Users.AddEntity(newUser);
+                
                 await _unitOfWork.SaveChangesAsync();
+                var claimsPrincipal = CreateClaimsPrincipal(newUser);
+                return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
             }
             catch (Exception)
             {
-                return ServiceResult<ClaimsPrincipal>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult<ClaimsPrincipal>.Failure(ServiceError.UnexpectedError());
             }
-
-            var claimsPrincipal = CreateClaimsPrincipal(newUser);
-
-            return ServiceResult<ClaimsPrincipal>.Success(claimsPrincipal);
         }
 
         public ServiceResult<UserPageDataDto> GetUserData()
         {
-            var id = _userContextHelper.UserId!.Value;
-            var user = _unitOfWork.Users.GetById(id);
+            try
+            {
+                var id = _userContextHelper.UserId!.Value;
+                var user = _unitOfWork.Users.GetById(id);
 
-            var result = user.Adapt<UserPageDataDto>();
+                if (user == null)
+                {
+                    return ServiceResult<UserPageDataDto>.Failure(ServiceError.UserNotFound());
+                }
 
-            return ServiceResult<UserPageDataDto>.Success(result);
+                var result = user.Adapt<UserPageDataDto>();
+
+                return ServiceResult<UserPageDataDto>.Success(result);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(ServiceError.UnexpectedError());
+            }
         }
 
-        public async Task<ServiceResult<object>> UpdateUserPhoto(UserPictureDto userPicture)
+        public async Task<ServiceResult> UpdateUserPhoto(UserPictureDto userPicture)
         {
             var id = _userContextHelper.UserId!.Value;
 
@@ -193,8 +202,7 @@ namespace BookingClinic.Application.Services
 
             if (userEntity == null)
             {
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.Unauthorized() });
+                return ServiceResult.Failure(ServiceError.UserNotFound());
             }
 
             userEntity.ProfilePicture = newName;
@@ -208,34 +216,30 @@ namespace BookingClinic.Application.Services
                 await _fileStorage.SaveUserPhotoAsync(userPicture, id);
 
                 await transaction.CommitAsync();
-                return ServiceResult<object>.Success(null);
+                return ServiceResult.Success();
             }
             catch (Exception)
             {
                 await transaction.RollbackAsync();
-                return ServiceResult<object>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
             }
         }
 
         public async Task<ServiceResult<UserPageDataDto>> UpdateUser(UserPageDataUpdateDto dto)
         {
             var id = _userContextHelper.UserId!.Value;
-
             var user = _unitOfWork.Users.GetById(id);
             
             if (user == null)
             {
-                return ServiceResult<UserPageDataDto>.Failure(
-                    new List<ServiceError>() { ServiceError.Unauthorized() });
+                return ServiceResult<UserPageDataDto>.Failure(ServiceError.UserNotFound());
             }
 
             var check = _passwordHelper.CheckPasswordEquality(user, dto.Password);
 
             if (!check)
             {
-                return ServiceResult<UserPageDataDto>.Failure(
-                    new List<ServiceError>() { ServiceError.InvalidPassword() });
+                return ServiceResult<UserPageDataDto>.Failure(ServiceError.InvalidEmailOrPassword());
             }
 
             user.Name = dto.Name;
@@ -258,8 +262,7 @@ namespace BookingClinic.Application.Services
             //}
             catch (Exception)
             {
-                return ServiceResult<UserPageDataDto>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult<UserPageDataDto>.Failure(ServiceError.UnexpectedError());
             }
         }
     }

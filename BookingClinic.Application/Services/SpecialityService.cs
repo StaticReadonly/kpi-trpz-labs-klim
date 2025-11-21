@@ -23,8 +23,7 @@ namespace BookingClinic.Application.Services
             }
             catch (Exception)
             {
-                return ServiceResult<IEnumerable<string>>.Failure(
-                    new List<ServiceError>() { ServiceError.UnexpectedError() });
+                return ServiceResult<IEnumerable<string>>.Failure(ServiceError.UnexpectedError());
             }
         }
     }
