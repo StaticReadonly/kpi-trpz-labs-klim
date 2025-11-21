@@ -131,20 +131,34 @@ namespace BookingClinic.Application.Services
         {
             var id = _userContextHelper.UserId!.Value;
 
-            var res = _unitOfWork.Appointments.GetPatientAppointments(id).ToList();
+            try
+            {
+                var res = _unitOfWork.Appointments.GetPatientAppointments(id).ToList();
 
-            var appointments = res.Adapt<List<PatientAppointmentDto>>();
-            return ServiceResult<List<PatientAppointmentDto>>.Success(appointments);
+                var appointments = res.Adapt<List<PatientAppointmentDto>>();
+                return ServiceResult<List<PatientAppointmentDto>>.Success(appointments);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<List<PatientAppointmentDto>>.Failure(ServiceError.UnexpectedError());
+            }
         }
 
         public ServiceResult<List<DoctorAppointmentDto>> GetDoctorAppointments()
         {
             var id = _userContextHelper.UserId!.Value;
 
-            var res = _unitOfWork.Appointments.GetDoctorAppointments(id, DateTime.UtcNow.Date);
+            try
+            {
+                var res = _unitOfWork.Appointments.GetDoctorAppointments(id, DateTime.UtcNow.Date);
 
-            var appointments = res.Adapt<List<DoctorAppointmentDto>>();
-            return ServiceResult<List<DoctorAppointmentDto>>.Success(appointments);
+                var appointments = res.Adapt<List<DoctorAppointmentDto>>();
+                return ServiceResult<List<DoctorAppointmentDto>>.Success(appointments);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<List<DoctorAppointmentDto>>.Failure(ServiceError.UnexpectedError());
+            }
         }
 
         public async Task<ServiceResult> CancelAppointment(Guid appId)
