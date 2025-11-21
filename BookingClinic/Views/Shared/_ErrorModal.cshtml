@@ -29,11 +29,40 @@
 @if (error != null)
 {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            <text>
-                let errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                errorModal.show();
-            </text>
-        });
+        (function () {
+            function showErrorModal() {
+                var modalEl = document.getElementById('errorModal');
+                if (!modalEl) return;
+
+                // Bootstrap 5 (native)
+                if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                    try {
+                        var m = new bootstrap.Modal(modalEl);
+                        m.show();
+                        return;
+                    } catch (e) {
+                        console.error('Error showing bootstrap modal (BS5):', e);
+                    }
+                }
+
+                // Fallback для Bootstrap 4 (jQuery)
+                if (window.jQuery && typeof jQuery === 'function' && typeof jQuery(modalEl).modal === 'function') {
+                    try {
+                        jQuery(modalEl).modal('show');
+                        return;
+                    } catch (e) {
+                        console.error('Error showing bootstrap modal (BS4/jQuery):', e);
+                    }
+                }
+
+                console.warn('Error modal: Bootstrap JS not found or unsupported version.');
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', showErrorModal);
+            } else {
+                showErrorModal();
+            }
+        })();
     </script>
 }

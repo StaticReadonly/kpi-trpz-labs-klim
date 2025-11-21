@@ -15,18 +15,22 @@
     <div class="mb-3">
         <label asp-for="Name" class="form-label"></label>
         <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="City" class="form-label"></label>
         <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="Street" class="form-label"></label>
         <input asp-for="Street" class="form-control" />
+        <span asp-validation-for="Street" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="Building" class="form-label"></label>
         <input asp-for="Building" class="form-control" />
+        <span asp-validation-for="Building" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Create</button>

@@ -70,7 +70,8 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                //TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                ViewData["Errors"] = res.Errors;
                 return View("CreateUser", dto);
             }
 
@@ -161,7 +162,8 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                //TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                ViewData["Errors"] = res.Errors;
                 return View("CreateClinic", dto);
             }
 
@@ -239,7 +241,8 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                //TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                ViewData["Errors"] = res.Errors;
                 return View("CreateSpeciality", dto);
             }
 
