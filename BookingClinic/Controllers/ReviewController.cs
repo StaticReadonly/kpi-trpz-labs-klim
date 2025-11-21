@@ -1,6 +1,5 @@
-﻿using BookingClinic.Application.Interfaces.Services;
-using BookingClinic.Application.Data.Review;
-using BookingClinic.Application.Common;
+﻿using BookingClinic.Application.Data.Review;
+using BookingClinic.Application.Interfaces.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,8 +45,6 @@ namespace BookingClinic.Controllers
 
             if (!validationRes.IsValid)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(
-                    new List<ServiceError>() { ServiceError.InvalidReviewData()});
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId});
             }
 

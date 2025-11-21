@@ -25,7 +25,7 @@ namespace BookingClinic.Application.Services
         {
             var id = _userContextHelper.UserId!.Value;
 
-            if (!_userContextHelper.IsPatient || !_userContextHelper.IsAdmin)
+            if (!_userContextHelper.IsPatient && !_userContextHelper.IsAdmin)
             {
                 return ServiceResult.Failure(ServiceError.Unauthorized());
             }

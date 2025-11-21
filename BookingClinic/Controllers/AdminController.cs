@@ -39,6 +39,11 @@ namespace BookingClinic.Controllers
         [HttpGet("users")]
         public IActionResult Users()
         {
+            if (TempData["Errors"] != null)
+            {
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+            }
+
             var users = _adminService.GetAllUsers();
             return View(users);
         }
@@ -131,6 +136,11 @@ namespace BookingClinic.Controllers
         [HttpGet("clinics")]
         public IActionResult Clinics()
         {
+            if (TempData["Errors"] != null)
+            {
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+            }
+
             var clinics = _adminService.GetAllClinics();
             return View(clinics);
         }
@@ -204,6 +214,11 @@ namespace BookingClinic.Controllers
         [HttpGet("specialities")]
         public IActionResult Specialities()
         {
+            if (TempData["Errors"] != null)
+            {
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+            }
+
             var specs = _adminService.GetAllSpecialities();
             return View(specs);
         }

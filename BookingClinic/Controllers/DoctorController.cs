@@ -48,13 +48,13 @@ namespace BookingClinic.Controllers
         {
             if (TempData["Errors"] != null)
             {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"]!.ToString()!);
             }
 
             if (TempData["ReviewErrors"] != null)
             {
                 List<ValidationFailure> failures = 
-                    JsonSerializer.Deserialize<List<ValidationFailure>>(TempData["ReviewErrors"].ToString());
+                    JsonSerializer.Deserialize<List<ValidationFailure>>(TempData["ReviewErrors"]!.ToString()!);
 
                 var valRes = new ValidationResult(failures);
                 valRes.AddToModelState(ModelState);

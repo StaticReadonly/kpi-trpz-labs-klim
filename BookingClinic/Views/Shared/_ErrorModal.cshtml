@@ -13,11 +13,11 @@
     <div class="modal-dialog">
         <div class="modal-content border-danger">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="errorModalLabel">@error?.ErrorName</h5>
+                <h5 class="modal-title" id="errorModalLabel">@error?.Code.ToString()</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>@error?.ErrorMessage</div>
+                <div>@error?.Message</div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
