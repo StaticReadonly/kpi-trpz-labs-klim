@@ -1,4 +1,4 @@
-﻿using BookingClinic.Application.Interfaces.Repositories;
+﻿using BookingClinic.Domain.Interfaces.Repositories;
 using BookingClinic.Infrastructure.AppContext;
 using Microsoft.EntityFrameworkCore;
 

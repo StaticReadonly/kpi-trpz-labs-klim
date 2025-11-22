@@ -1,4 +1,4 @@
-﻿using BookingClinic.Application.Interfaces.Repositories;
+﻿using BookingClinic.Domain.Interfaces.Repositories;
 
 namespace BookingClinic.Application.Interfaces.UnitOfWork
 {

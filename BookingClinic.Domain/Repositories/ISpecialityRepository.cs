@@ -1,6 +1,6 @@
 ﻿using BookingClinic.Domain.Entities;
 
-namespace BookingClinic.Application.Interfaces.Repositories
+namespace BookingClinic.Domain.Interfaces.Repositories
 {
     public interface ISpecialityRepository : IRepository<Speciality, Guid>
     {

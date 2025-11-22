@@ -1,4 +1,4 @@
-﻿namespace BookingClinic.Application.Interfaces.Repositories
+﻿namespace BookingClinic.Domain.Interfaces.Repositories
 {
     public interface IRepository<T, in TKey> where T : class
     {
