@@ -10,7 +10,13 @@ namespace BookingClinic.Infrastructure.EntityConfigs
         {
             builder.HasOne(d => d.Speciality)
                 .WithMany(s => s.Doctors)
-                .HasForeignKey(d => d.SpecialityId);
+                .HasForeignKey(d => d.SpecialityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(d => d.Clinic)
+                .WithMany(c => c.Doctors)
+                .HasForeignKey(d => d.ClinicId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

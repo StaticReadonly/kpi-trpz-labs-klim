@@ -131,8 +131,11 @@ namespace BookingClinic.Controllers
             {
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
-
-            _viewMessageHelper.SetSuccess("User deleted successfully", TempData);
+            else
+            {
+                _viewMessageHelper.SetSuccess("User deleted successfully", TempData);
+            }
+                
             return RedirectToAction("Users");
         }
 
@@ -211,8 +214,11 @@ namespace BookingClinic.Controllers
             {
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
+            else
+            {
+                _viewMessageHelper.SetSuccess("Clinic deleted successfully", TempData);
+            }
 
-            _viewMessageHelper.SetSuccess("Clinic deleted successfully", TempData);
             return RedirectToAction("Clinics");
         }
 
@@ -291,8 +297,11 @@ namespace BookingClinic.Controllers
             {
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
-
-            _viewMessageHelper.SetSuccess("Speciality deleted successfully", TempData);
+            else
+            {
+                _viewMessageHelper.SetSuccess("Speciality deleted successfully", TempData);
+            }
+                
             return RedirectToAction("Specialities");
         }
     }
