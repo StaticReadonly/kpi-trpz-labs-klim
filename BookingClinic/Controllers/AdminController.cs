@@ -1,10 +1,10 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Admin;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.Visitor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -14,11 +14,16 @@ namespace BookingClinic.Controllers
     {
         private readonly IUserExportService _userExportService;
         private readonly IAdminService _adminService;
+        private readonly IViewMessageHelper _viewMessageHelper;
 
-        public AdminController(IUserExportService userExportService, IAdminService adminService)
+        public AdminController(
+            IUserExportService userExportService, 
+            IAdminService adminService,
+            IViewMessageHelper viewMessageHelper)
         {
             _userExportService = userExportService;
             _adminService = adminService;
+            _viewMessageHelper = viewMessageHelper;
         }
 
         [HttpGet]
@@ -38,11 +43,6 @@ namespace BookingClinic.Controllers
         [HttpGet("users")]
         public IActionResult Users()
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
-            }
-
             var users = _adminService.GetAllUsers();
             return View(users);
         }
@@ -69,8 +69,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                //TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View("CreateUser", dto);
             }
 
@@ -86,7 +85,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Users");
             }
 
@@ -113,7 +112,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("EditUser", new { id = dto.Id });
             }
 
@@ -127,7 +126,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
 
             return RedirectToAction("Users");
@@ -136,11 +135,6 @@ namespace BookingClinic.Controllers
         [HttpGet("clinics")]
         public IActionResult Clinics()
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
-            }
-
             var clinics = _adminService.GetAllClinics();
             return View(clinics);
         }
@@ -155,14 +149,15 @@ namespace BookingClinic.Controllers
         public async Task<IActionResult> CreateClinicPost([FromForm] ClinicAdminDto dto)
         {
             if (!ModelState.IsValid)
+            {
                 return View("CreateClinic", dto);
+            }
 
             var res = await _adminService.CreateClinic(dto);
 
             if (!res.IsSuccess)
             {
-                //TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View("CreateClinic", dto);
             }
 
@@ -175,7 +170,7 @@ namespace BookingClinic.Controllers
             var clinic = _adminService.GetAllClinics().FirstOrDefault(c => c.Id == id);
             if (clinic == null)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(new List<ServiceError> { ServiceError.UnexpectedError() });
+                _viewMessageHelper.SetErrors(new List<ServiceError> { ServiceError.UnexpectedError() }, TempData);
                 return RedirectToAction("Clinics");
             }
 
@@ -186,13 +181,15 @@ namespace BookingClinic.Controllers
         public async Task<IActionResult> EditClinicPost([FromForm] ClinicAdminDto dto)
         {
             if (!ModelState.IsValid)
+            {
                 return View("EditClinic", dto);
+            }
 
             var res = await _adminService.UpdateClinic(dto);
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("EditClinic", new { id = dto.Id });
             }
 
@@ -206,7 +203,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
 
             return RedirectToAction("Clinics");
@@ -215,11 +212,6 @@ namespace BookingClinic.Controllers
         [HttpGet("specialities")]
         public IActionResult Specialities()
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
-            }
-
             var specs = _adminService.GetAllSpecialities();
             return View(specs);
         }
@@ -234,14 +226,15 @@ namespace BookingClinic.Controllers
         public async Task<IActionResult> CreateSpecialityPost([FromForm] SpecialityAdminDto dto)
         {
             if (!ModelState.IsValid)
+            {
                 return View("CreateSpeciality", dto);
+            } 
 
             var res = await _adminService.CreateSpeciality(dto);
 
             if (!res.IsSuccess)
             {
-                //TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View("CreateSpeciality", dto);
             }
 
@@ -254,7 +247,7 @@ namespace BookingClinic.Controllers
             var spec = _adminService.GetAllSpecialities().FirstOrDefault(s => s.Id == id);
             if (spec == null)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(new List<ServiceError> { ServiceError.UnexpectedError() });
+                _viewMessageHelper.SetErrors(new List<ServiceError> { ServiceError.UnexpectedError() }, TempData);
                 return RedirectToAction("Specialities");
             }
 
@@ -265,13 +258,15 @@ namespace BookingClinic.Controllers
         public async Task<IActionResult> EditSpecialityPost([FromForm] SpecialityAdminDto dto)
         {
             if (!ModelState.IsValid)
+            {
                 return View("EditSpeciality", dto);
+            } 
 
             var res = await _adminService.UpdateSpeciality(dto);
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("EditSpeciality", new { id = dto.Id });
             }
 
@@ -285,7 +280,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
 
             return RedirectToAction("Specialities");

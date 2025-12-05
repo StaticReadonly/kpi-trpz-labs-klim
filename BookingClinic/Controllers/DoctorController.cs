@@ -1,10 +1,7 @@
-﻿using BookingClinic.Application.Common;
-using BookingClinic.Application.Data.Doctor;
+﻿using BookingClinic.Application.Data.Doctor;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
-using FluentValidation.AspNetCore;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -13,13 +10,16 @@ namespace BookingClinic.Controllers
     {
         private readonly IDoctorService _doctorService;
         private readonly ISearchDoctorFacade _searchDoctorFacade;
+        private readonly IViewMessageHelper _viewMessageHelper;
 
         public DoctorController(
             IDoctorService doctorService,
-            ISearchDoctorFacade searchDoctorFacade)
+            ISearchDoctorFacade searchDoctorFacade,
+            IViewMessageHelper viewMessageHelper)
         {
             _doctorService = doctorService;
             _searchDoctorFacade = searchDoctorFacade;
+            _viewMessageHelper = viewMessageHelper;
         }
 
         [HttpGet]
@@ -33,7 +33,7 @@ namespace BookingClinic.Controllers
             ViewData["Page"] = res.Page;
             ViewData["Pages"] = res.Pages;
             ViewData["Doctors"] = res.Doctors;
-            ViewData["Errors"] = res.Errors;
+            _viewMessageHelper.SetErrors(res.Errors, TempData);
 
             return View(dto);
         }
@@ -41,20 +41,6 @@ namespace BookingClinic.Controllers
         [HttpGet("{id:guid}")]
         public IActionResult Profile([FromRoute] Guid id)
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"]!.ToString()!);
-            }
-
-            if (TempData["ReviewErrors"] != null)
-            {
-                List<ValidationFailure> failures = 
-                    JsonSerializer.Deserialize<List<ValidationFailure>>(TempData["ReviewErrors"]!.ToString()!);
-
-                var valRes = new ValidationResult(failures);
-                valRes.AddToModelState(ModelState);
-            }
-
             var res = _doctorService.GetDoctorData(id);
 
             if (res.IsSuccess)
@@ -63,7 +49,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View();
             }
         }

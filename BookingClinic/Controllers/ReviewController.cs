@@ -1,9 +1,9 @@
 ﻿using BookingClinic.Application.Data.Review;
+using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -12,13 +12,16 @@ namespace BookingClinic.Controllers
     {
         private readonly IReviewService _reviewService;
         private readonly IValidator<AddReviewDto> _addReviewValidator;
+        private readonly IViewMessageHelper _viewMessageHelper;
 
         public ReviewController(
             IReviewService reviewService, 
-            IValidator<AddReviewDto> addReviewValidator)
+            IValidator<AddReviewDto> addReviewValidator,
+            IViewMessageHelper viewMessageHelper)
         {
             _reviewService = reviewService;
             _addReviewValidator = addReviewValidator;
+            _viewMessageHelper = viewMessageHelper;
         }
 
         [HttpGet("{id:guid}")]
@@ -32,7 +35,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View();
             }
         }
@@ -56,7 +59,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
             }
         }

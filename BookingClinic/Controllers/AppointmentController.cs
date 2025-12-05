@@ -1,13 +1,10 @@
-﻿using BookingClinic.Application.Common;
-using BookingClinic.Application.Data.Appointment;
+﻿using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -19,31 +16,29 @@ namespace BookingClinic.Controllers
         private readonly IPaginationHelper<DoctorAppointmentDto> _doctorAppointmentHelper;
         private readonly IDoctorService _doctorService;
         private readonly IUserContextHelper _userContextHelper;
+        private readonly IViewMessageHelper _viewMessageHelper;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IPaginationHelper<PatientAppointmentDto> patientPaginationHelper,
             IPaginationHelper<DoctorAppointmentDto> doctorAppointmentHelper,
             IDoctorService doctorService,
-            IUserContextHelper userContextHelper)
+            IUserContextHelper userContextHelper,
+            IViewMessageHelper viewMessageHelper)
         {
             _appointmentService = appointmentService;
             _patientPaginationHelper = patientPaginationHelper;
             _doctorAppointmentHelper = doctorAppointmentHelper;
             _doctorService = doctorService;
             _userContextHelper = userContextHelper;
+            _viewMessageHelper = viewMessageHelper;
         }
 
         [HttpGet]
         [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public IActionResult Index([FromQuery] int page)
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
-            }
-
-            if (User.IsInRole("Doctor"))
+            if (_userContextHelper.IsDoctor)
             {
                 var res = _appointmentService.GetDoctorAppointments();
 
@@ -58,7 +53,7 @@ namespace BookingClinic.Controllers
                 {
                     ViewData["Page"] = 1;
                     ViewData["Pages"] = new List<int> { 1 };
-                    ViewData["Errors"] = res.Errors;
+                    _viewMessageHelper.SetErrors(res.Errors, TempData);
                     return View("Doctor", new List<DoctorAppointmentDto>());
                 }
             }
@@ -77,7 +72,7 @@ namespace BookingClinic.Controllers
                 {
                     ViewData["Page"] = 1;
                     ViewData["Pages"] = new List<int> { 1 };
-                    ViewData["Errors"] = res.Errors;
+                    _viewMessageHelper.SetErrors(res.Errors, TempData);
                     return View("Patient", new List<PatientAppointmentDto>());
                 }
             }
@@ -87,11 +82,6 @@ namespace BookingClinic.Controllers
         [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
         public IActionResult FinishedAppointment([FromQuery] Guid patientId)
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
-            }
-
             var docId = _userContextHelper.UserId!.Value;
             var res = _doctorService.GetDoctorData(docId);
 
@@ -103,7 +93,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("FinishedAppointment", new {patientId});
             }
         }
@@ -120,7 +110,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Index");
             }
         }
@@ -134,7 +124,7 @@ namespace BookingClinic.Controllers
 
             if (!res.IsSuccess)
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
             }
             return RedirectToAction("Index", "Appointment");
@@ -153,7 +143,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("FinishedAppointment", new { patientId = dto.PatientId });
             }
         }
@@ -170,7 +160,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Index");
             }
         }

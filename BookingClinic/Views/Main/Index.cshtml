@@ -1,4 +1,6 @@
-﻿@{
+﻿@using BookingClinic.Application.Interfaces.Helpers
+@inject IUserContextHelper userContextHelper
+@{
     ViewData["Title"] = "Welcome";
 }
 
@@ -9,15 +11,15 @@
         <a href="/user" class="btn btn-outline-primary btn-lg py-4">Your account</a>
         <a href="/doctors" class="btn btn-outline-primary btn-lg py-4">Find doctors</a>
 
-        @if (User.IsInRole("Patient") || User.IsInRole("Admin"))
+        @if (userContextHelper.IsPatient || userContextHelper.IsAdmin)
         {
             <a href="/appointment" class="btn btn-outline-primary btn-lg py-4">My appointments</a>
         }
-        @if (User.IsInRole("Doctor"))
+        @if (userContextHelper.IsDoctor)
         {
             <a href="/appointment" class="btn btn-outline-primary btn-lg py-4">Today's appointments</a>
         }
-        @if (User.IsInRole("Admin"))
+        @if (userContextHelper.IsAdmin)
         {
             <a href="/manage" class="btn btn-outline-primary btn-lg py-4">Manage</a>
         }

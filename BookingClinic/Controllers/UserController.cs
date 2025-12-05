@@ -1,13 +1,12 @@
-﻿using BookingClinic.Application.Interfaces.Services;
-using BookingClinic.Application.Data.User;
-using BookingClinic.Application.Common;
+﻿using BookingClinic.Application.Data.User;
+using BookingClinic.Application.Interfaces.Helpers;
+using BookingClinic.Application.Interfaces.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace BookingClinic.Controllers
 {
@@ -18,28 +17,26 @@ namespace BookingClinic.Controllers
         private readonly IValidator<LoginUserDto> _loginValidator;
         private readonly IValidator<RegisterUserDto> _registerValidator;
         private readonly IValidator<UserPageDataDto> _userDataValidator;
+        private readonly IViewMessageHelper _viewMessageHelper;
 
         public UserController(
             IUserService userService,
             IValidator<LoginUserDto> loginValidator,
             IValidator<RegisterUserDto> registerValidator,
-            IValidator<UserPageDataDto> userDataValidator)
+            IValidator<UserPageDataDto> userDataValidator,
+            IViewMessageHelper viewMessageHelper)
         {
             _userService = userService;
             _loginValidator = loginValidator;
             _registerValidator = registerValidator;
             _userDataValidator = userDataValidator;
+            _viewMessageHelper = viewMessageHelper;
         }
 
         [HttpGet]
         [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> Index()
         {
-            if (TempData["Errors"] != null)
-            {
-                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
-            }
-
             var userData = _userService.GetUserData();
 
             if (userData.IsSuccess)
@@ -85,7 +82,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View("LoginPage", dto);
             }
         }
@@ -121,7 +118,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return View("RegisterPage", dto);
             }
         }
@@ -147,7 +144,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Index");
             }
         }
@@ -166,7 +163,7 @@ namespace BookingClinic.Controllers
             }
             else
             {
-                ViewData["Errors"] = res.Errors;
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Index");
             }
         }

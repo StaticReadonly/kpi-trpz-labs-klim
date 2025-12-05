@@ -1,12 +1,16 @@
 ﻿@using BookingClinic.Application.Common
+@using BookingClinic.Application.Interfaces.Helpers
+@inject IViewMessageHelper messageHelper
 @{
-    var errors = ViewData["Errors"];
-    ServiceError? error = null;
+    var errors = messageHelper.GetErrors(TempData);
+    var error = errors.FirstOrDefault();
+    // var errors = ViewData["Errors"];
+    // ServiceError? error = null;
 
-    if (errors != null)
-    {
-        error = ((IEnumerable<ServiceError>)errors).FirstOrDefault();
-    }
+    // if (errors != null)
+    // {
+    //     error = ((IEnumerable<ServiceError>)errors).FirstOrDefault();
+    // }
 }
 
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">

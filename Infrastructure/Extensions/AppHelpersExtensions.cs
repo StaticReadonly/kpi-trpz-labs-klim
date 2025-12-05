@@ -19,6 +19,7 @@ namespace BookingClinic.Infrastructure.Extensions
             services.AddScoped<IFileStorage, UserFileStorage>();
             services.AddScoped<IUserContextHelper, UserContextHelper>();
             services.AddScoped<IPasswordHelper, PasswordHelper>();
+            services.AddScoped<IViewMessageHelper, ViewMessageHelper>();
 
             return services;
         }

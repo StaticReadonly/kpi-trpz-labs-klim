@@ -5,12 +5,6 @@
 }
 
 <h2>Edit clinic</h2>
-
-@if (TempData["Errors"] != null)
-{
-    <div class="alert alert-danger">@TempData["Errors"]</div>
-}
-
 <form method="post" asp-controller="Admin" asp-action="EditClinicPost">
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
