@@ -55,6 +55,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("Review added successfully", TempData);
                 return RedirectToAction("Index", new {id = dto.DoctorId});
             }
             else
@@ -72,6 +73,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("Review deleted successfully", TempData);
                 return RedirectToAction("Index", new {id = dto.DoctorId});
             }
             else

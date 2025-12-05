@@ -36,6 +36,7 @@ namespace BookingClinic.Controllers
         public IActionResult GeneratePdfUsers()
         {
             _userExportService.ExportUsersToPdf();
+            _viewMessageHelper.SetSuccess("Export successfull", TempData);
             return RedirectToAction("Index");
         }
 
@@ -73,6 +74,7 @@ namespace BookingClinic.Controllers
                 return View("CreateUser", dto);
             }
 
+            _viewMessageHelper.SetSuccess("User created successfully", TempData);
             return RedirectToAction("Users");
         }
 
@@ -88,7 +90,7 @@ namespace BookingClinic.Controllers
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Users");
             }
-
+            
             return View(res.Result);
         }
 
@@ -116,6 +118,7 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("EditUser", new { id = dto.Id });
             }
 
+            _viewMessageHelper.SetSuccess("User changed successfully", TempData);
             return RedirectToAction("Users");
         }
 
@@ -129,6 +132,7 @@ namespace BookingClinic.Controllers
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
 
+            _viewMessageHelper.SetSuccess("User deleted successfully", TempData);
             return RedirectToAction("Users");
         }
 
@@ -161,6 +165,7 @@ namespace BookingClinic.Controllers
                 return View("CreateClinic", dto);
             }
 
+            _viewMessageHelper.SetSuccess("Clinic created successfully", TempData);
             return RedirectToAction("Clinics");
         }
 
@@ -193,6 +198,7 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("EditClinic", new { id = dto.Id });
             }
 
+            _viewMessageHelper.SetSuccess("Clinic changed successfully", TempData);
             return RedirectToAction("Clinics");
         }
 
@@ -206,6 +212,7 @@ namespace BookingClinic.Controllers
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
 
+            _viewMessageHelper.SetSuccess("Clinic deleted successfully", TempData);
             return RedirectToAction("Clinics");
         }
 
@@ -238,6 +245,7 @@ namespace BookingClinic.Controllers
                 return View("CreateSpeciality", dto);
             }
 
+            _viewMessageHelper.SetSuccess("Speciality created successfully", TempData);
             return RedirectToAction("Specialities");
         }
 
@@ -270,6 +278,7 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("EditSpeciality", new { id = dto.Id });
             }
 
+            _viewMessageHelper.SetSuccess("Speciality changed successfully", TempData);
             return RedirectToAction("Specialities");
         }
 
@@ -283,6 +292,7 @@ namespace BookingClinic.Controllers
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
             }
 
+            _viewMessageHelper.SetSuccess("Speciality deleted successfully", TempData);
             return RedirectToAction("Specialities");
         }
     }

@@ -2,33 +2,32 @@
 @using BookingClinic.Application.Interfaces.Helpers
 @inject IViewMessageHelper messageHelper
 @{
-    var errors = messageHelper.GetErrors(TempData);
-    var error = errors.FirstOrDefault();
+    var success = messageHelper.GetSuccess(TempData);
 }
 
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="errorModalLabel">@error?.Code.ToString()</h5>
+        <div class="modal-content border-success">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>@error?.Message</div>
+                <div>@success</div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
-@if (error != null)
+@if (success != null)
 {
     <script>
         (function () {
-            function showErrorModal() {
-                var modalEl = document.getElementById('errorModal');
+            function showSuccessModal() {
+                var modalEl = document.getElementById('successModal');
                 if (!modalEl) return;
 
                 // Bootstrap 5 (native)
@@ -42,7 +41,7 @@
                     }
                 }
 
-                // Fallback для Bootstrap 4 (jQuery)
+                // Fallback for Bootstrap 4 (jQuery)
                 if (window.jQuery && typeof jQuery === 'function' && typeof jQuery(modalEl).modal === 'function') {
                     try {
                         jQuery(modalEl).modal('show');
@@ -52,13 +51,13 @@
                     }
                 }
 
-                console.warn('Error modal: Bootstrap JS not found or unsupported version.');
+                console.warn('Success modal: Bootstrap JS not found or unsupported version.');
             }
 
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', showErrorModal);
+                document.addEventListener('DOMContentLoaded', showSuccessModal);
             } else {
-                showErrorModal();
+                showSuccessModal();
             }
         })();
     </script>

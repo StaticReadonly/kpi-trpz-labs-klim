@@ -106,6 +106,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("Appointment finished successfully", TempData);
                 return RedirectToAction("FinishedAppointment", new {patientId = dto.PatientId});
             }
             else
@@ -127,6 +128,8 @@ namespace BookingClinic.Controllers
                 _viewMessageHelper.SetErrors(res.Errors, TempData);
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
             }
+
+            _viewMessageHelper.SetSuccess("Appointment created successfully", TempData);
             return RedirectToAction("Index", "Appointment");
         }
 
@@ -139,6 +142,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("Appointment created successfully", TempData);
                 return RedirectToAction("FinishedAppointment", new { dto.PatientId });
             }
             else
@@ -156,6 +160,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("Appointment canceled successfully", TempData);
                 return RedirectToAction("Index");
             }
             else

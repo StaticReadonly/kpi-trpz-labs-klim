@@ -78,6 +78,7 @@ namespace BookingClinic.Controllers
                     return Redirect(dto.ReturnUrl);
                 }
 
+                _viewMessageHelper.SetSuccess("Login successfull", TempData);
                 return RedirectToAction("Index");
             }
             else
@@ -114,6 +115,7 @@ namespace BookingClinic.Controllers
             if (res.IsSuccess)
             {
                 await HttpContext.SignInAsync(res.Result);
+                _viewMessageHelper.SetSuccess("Registration successfull", TempData);
                 return RedirectToAction("Index");
             }
             else
@@ -140,6 +142,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("User data updated successfully", TempData);
                 return RedirectToAction("Index");
             }
             else
@@ -159,6 +162,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
+                _viewMessageHelper.SetSuccess("Profile picture updated successfully", TempData);
                 return RedirectToAction("Index");
             }
             else
