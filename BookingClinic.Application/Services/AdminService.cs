@@ -53,41 +53,41 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateUser(UserAdminDto dto)
+        public async Task<ServiceResult> UpdateUser(UserAdminDto user)
         {
             try
             {
-                if (dto.Id == null || dto.Id == Guid.Empty)
+                if (user.Id == null || user.Id == Guid.Empty)
                     return ServiceResult.Failure(ServiceError.UserIdCantBeEmpty());
 
                 
-                var existing = _unitOfWork.Users.GetById(dto.Id.Value);
+                var existing = _unitOfWork.Users.GetById(user.Id.Value);
                 if (existing == null)
                     return ServiceResult.Failure(ServiceError.UserNotFound());
 
-                existing.Name = dto.Name;
-                existing.Surname = dto.Surname;
-                existing.Email = dto.Email;
-                existing.Phone = dto.Phone;
+                existing.Name = user.Name;
+                existing.Surname = user.Surname;
+                existing.Email = user.Email;
+                existing.Phone = user.Phone;
 
-                if (existing.Email != dto.Email || existing.Phone != dto.Phone || !string.IsNullOrEmpty(dto.Password))
+                if (existing.Email != user.Email || existing.Phone != user.Phone || !string.IsNullOrEmpty(user.Password))
                 {
-                    if (string.IsNullOrEmpty(dto.Password))
+                    if (string.IsNullOrEmpty(user.Password))
                     {
                         return ServiceResult.Failure(ServiceError.UserMustProvidePassword());
                     }
 
-                    var newHash = _passwordHelper.GetPasswordHash(existing, dto.Password);
+                    var newHash = _passwordHelper.GetPasswordHash(existing, user.Password);
                     existing.PasswordHash = newHash;
                 }
 
                 if (existing is Doctor doc)
                 {
-                    if (dto.ClinicId.HasValue)
-                        doc.ClinicId = dto.ClinicId.Value;
+                    if (user.ClinicId.HasValue)
+                        doc.ClinicId = user.ClinicId.Value;
 
-                    if (dto.SpecialityId.HasValue)
-                        doc.SpecialityId = dto.SpecialityId.Value;
+                    if (user.SpecialityId.HasValue)
+                        doc.SpecialityId = user.SpecialityId.Value;
                 }
 
                 _unitOfWork.Users.UpdateEntity(existing);
@@ -150,13 +150,13 @@ namespace BookingClinic.Application.Services
             return clinics.Adapt<IEnumerable<ClinicAdminDto>>();
         }
 
-        public async Task<ServiceResult> CreateClinic(ClinicAdminDto dto)
+        public async Task<ServiceResult> CreateClinic(ClinicAdminDto clinic)
         {
             try
             {
-                var clinic = _clinicFactory.CreateClinic(dto);
+                var newClinic = _clinicFactory.CreateClinic(clinic);
                 
-                _unitOfWork.Clinics.AddEntity(clinic);
+                _unitOfWork.Clinics.AddEntity(newClinic);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult.Success();
@@ -167,21 +167,21 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateClinic(ClinicAdminDto dto)
+        public async Task<ServiceResult> UpdateClinic(ClinicAdminDto clinic)
         {
             try
             {
-                if (dto.Id == null || dto.Id == Guid.Empty)
+                if (clinic.Id == null || clinic.Id == Guid.Empty)
                     return ServiceResult.Failure(ServiceError.ClinicIdCantBeEmpty());
 
-                var existing = _unitOfWork.Clinics.GetById(dto.Id.Value);
+                var existing = _unitOfWork.Clinics.GetById(clinic.Id.Value);
                 if (existing == null)
                     return ServiceResult.Failure(ServiceError.ClinicNotFound());
 
-                existing.Name = dto.Name;
-                existing.City = dto.City;
-                existing.Street = dto.Street;
-                existing.Building = dto.Building;
+                existing.Name = clinic.Name;
+                existing.City = clinic.City;
+                existing.Street = clinic.Street;
+                existing.Building = clinic.Building;
 
                 _unitOfWork.Clinics.UpdateEntity(existing);
                 await _unitOfWork.SaveChangesAsync();
@@ -219,11 +219,11 @@ namespace BookingClinic.Application.Services
             return specs.Adapt<IEnumerable<SpecialityAdminDto>>();
         }
 
-        public async Task<ServiceResult> CreateSpeciality(SpecialityAdminDto dto)
+        public async Task<ServiceResult> CreateSpeciality(SpecialityAdminDto speciality)
         {
             try
             {
-                var s = _specialityFactory.CreateSpeciality(dto);
+                var s = _specialityFactory.CreateSpeciality(speciality);
 
                 _unitOfWork.Specialities.AddEntity(s);
                 await _unitOfWork.SaveChangesAsync();
@@ -236,18 +236,18 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateSpeciality(SpecialityAdminDto dto)
+        public async Task<ServiceResult> UpdateSpeciality(SpecialityAdminDto speciality)
         {
             try
             {
-                if (dto.Id == null || dto.Id == Guid.Empty)
+                if (speciality.Id == null || speciality.Id == Guid.Empty)
                     return ServiceResult.Failure(ServiceError.SpecialityIdCantBeEmpty());
 
-                var existing = _unitOfWork.Specialities.GetById(dto.Id.Value);
+                var existing = _unitOfWork.Specialities.GetById(speciality.Id.Value);
                 if (existing == null)
                     return ServiceResult.Failure(ServiceError.SpecialityNotFound());
 
-                existing.Name = dto.Name;
+                existing.Name = speciality.Name;
                 _unitOfWork.Specialities.UpdateEntity(existing);
                 await _unitOfWork.SaveChangesAsync();
 

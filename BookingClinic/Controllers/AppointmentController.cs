@@ -44,7 +44,7 @@ namespace BookingClinic.Controllers
 
                 if (res.IsSuccess)
                 {
-                    var paginated = _doctorAppointmentHelper.Paginate(res.Result, page, 5, out var pages);
+                    var paginated = _doctorAppointmentHelper.Paginate(res.Result!, page, 5, out var pages);
                     ViewData["Page"] = page;
                     ViewData["Pages"] = pages;
                     return View("Doctor", paginated);
@@ -63,7 +63,7 @@ namespace BookingClinic.Controllers
 
                 if (res.IsSuccess)
                 {
-                    var paginated = _patientPaginationHelper.Paginate(res.Result, page, 5, out var pages);
+                    var paginated = _patientPaginationHelper.Paginate(res.Result!, page, 5, out var pages);
                     ViewData["Page"] = page;
                     ViewData["Pages"] = pages;
                     return View("Patient", paginated);

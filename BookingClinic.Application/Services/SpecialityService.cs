@@ -19,7 +19,7 @@ namespace BookingClinic.Application.Services
             {
                 var res = _unitOfWork.Specialities.GetAll().Select(c => c.Name).ToList();
 
-                return ServiceResult<IEnumerable<string>>.Success(res);
+                return ServiceResult<IEnumerable<string>>.Success(res!);
             }
             catch (Exception)
             {

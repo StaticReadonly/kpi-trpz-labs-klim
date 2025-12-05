@@ -250,7 +250,7 @@ namespace BookingClinic.Application.Services
                 await _unitOfWork.SaveChangesAsync();
                 return ServiceResult<UserPageDataDto>.Success(user.Adapt<UserPageDataDto>());
             }
-            catch (DatabaseOperationException exc)
+            catch (DatabaseOperationException)
             {
                 return ServiceResult<UserPageDataDto>.Failure(
                     new List<ServiceError>() { ServiceError.UserAlreadyExists() });

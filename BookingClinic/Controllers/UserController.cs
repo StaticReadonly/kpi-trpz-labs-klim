@@ -71,7 +71,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
-                await HttpContext.SignInAsync(res.Result);
+                await HttpContext.SignInAsync(res.Result!);
 
                 if (dto.ReturnUrl != null)
                 {
@@ -114,7 +114,7 @@ namespace BookingClinic.Controllers
 
             if (res.IsSuccess)
             {
-                await HttpContext.SignInAsync(res.Result);
+                await HttpContext.SignInAsync(res.Result!);
                 _viewMessageHelper.SetSuccess("Registration successfull", TempData);
                 return RedirectToAction("Index");
             }
