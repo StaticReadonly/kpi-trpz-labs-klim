@@ -117,6 +117,21 @@ namespace BookingClinic.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
+        public async Task<IActionResult> MakeAppointment(
+            [FromForm] MakeAppointmentDto dto)
+        {
+            var res = await _appointmentService.CreateAppointment(dto);
+
+            if (!res.IsSuccess)
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
+            }
+            return RedirectToAction("Index", "Appointment");
+        }
+
         [HttpPost("cancel")]
         [Authorize(AuthorizationPolicies.PatientOnlyPolicy)]
         public async Task<IActionResult> CancelAppointment([FromQuery] Guid id)

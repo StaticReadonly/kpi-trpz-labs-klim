@@ -1,5 +1,4 @@
 ﻿using BookingClinic.Application.Common;
-using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Interfaces.Services;
 using FluentValidation.AspNetCore;
@@ -71,21 +70,6 @@ namespace BookingClinic.Controllers
                 ViewData["Errors"] = res.Errors;
                 return View();
             }
-        }
-
-        [HttpPost]
-        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
-        public async Task<IActionResult> MakeAppointment(
-            [FromForm] MakeAppointmentDto dto)
-        {
-            var res = await _appointmentService.CreateAppointment(dto);
-
-            if (!res.IsSuccess)
-            {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
-                return RedirectToAction("Profile", new { id = dto.DoctorId });
-            }
-            return RedirectToAction("Index", "Appointment");
         }
 
         [HttpPost("docApp")]

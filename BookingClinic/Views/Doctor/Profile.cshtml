@@ -7,7 +7,7 @@
     var errors = ViewData["Errors"];
 }
 
-<form id="appointmentForm" method="post" asp-controller="Doctor" asp-action="MakeAppointment" class="d-none">
+<form id="appointmentForm" method="post" asp-controller="Appointment" asp-action="MakeAppointment" class="d-none">
     <input type="hidden" name="doctorId" id="doctorIdInput" />
     <input type="hidden" name="appointmentDay" id="appointmentDayInput" />
     <input type="hidden" name="appointmentTime" id="appointmentTimeInput" />
