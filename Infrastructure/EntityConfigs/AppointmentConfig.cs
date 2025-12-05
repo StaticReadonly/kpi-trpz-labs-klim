@@ -6,7 +6,7 @@ namespace BookingClinic.Infrastructure.EntityConfigs
 {
     public class AppointmentConfig : IEntityTypeConfiguration<Appointment>
     {
-        void IEntityTypeConfiguration<Appointment>.Configure(EntityTypeBuilder<Appointment> builder)
+        public void Configure(EntityTypeBuilder<Appointment> builder)
         {
             builder.HasOne(a => a.Doctor)
                 .WithMany(d => d.DoctorAppointments)

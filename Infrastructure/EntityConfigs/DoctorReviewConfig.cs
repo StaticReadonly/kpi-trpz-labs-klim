@@ -6,7 +6,7 @@ namespace BookingClinic.Infrastructure.EntityConfigs
 {
     public class DoctorReviewConfig : IEntityTypeConfiguration<DoctorReview>
     {
-        void IEntityTypeConfiguration<DoctorReview>.Configure(EntityTypeBuilder<DoctorReview> builder)
+        public void Configure(EntityTypeBuilder<DoctorReview> builder)
         {
             builder.HasOne(dr => dr.Doctor)
                 .WithMany(d => d.DoctorReviews)

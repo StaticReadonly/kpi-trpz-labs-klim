@@ -24,10 +24,9 @@ namespace BookingClinic.Services.Appointment
 
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                _logger.LogInformation("Tick");
                 var now = DateTime.UtcNow;
 
-                if (now.Hour < 22)
+                if (now.Hour > 22)
                 {
                     continue;
                 }
@@ -51,10 +50,7 @@ namespace BookingClinic.Services.Appointment
 
                     try
                     {
-                        if (appointments.Count != 0)
-                        {
-                            await unitOfWork.SaveChangesAsync();
-                        }
+                        await unitOfWork.SaveChangesAsync();
                     }
                     catch (Exception exc)
                     {

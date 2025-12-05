@@ -6,7 +6,7 @@ namespace BookingClinic.Infrastructure.EntityConfigs
 {
     public class SpecialityConfig : IEntityTypeConfiguration<Speciality>
     {
-        void IEntityTypeConfiguration<Speciality>.Configure(EntityTypeBuilder<Speciality> builder)
+        public void Configure(EntityTypeBuilder<Speciality> builder)
         {
             
         }
