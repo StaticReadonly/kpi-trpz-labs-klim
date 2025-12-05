@@ -24,7 +24,7 @@ namespace BookingClinic.Application.Services
             this._unitOfWork = unitOfWork;
             this._appointmentDomainService = appointmentDomainService;
             this._userContextHelper = userContextHelper;
-            _reviewsHelper = reviewsHelper;
+            this._reviewsHelper = reviewsHelper;
         }
 
         public ServiceResult<DoctorDataDto> GetDoctorData(Guid doctorId)
@@ -43,7 +43,7 @@ namespace BookingClinic.Application.Services
 
             if (_userContextHelper.IsPatient || _userContextHelper.IsAdmin)
             {
-                res.CanWriteReview = _reviewsHelper.CanUserWriteReview(doctorId, _userContextHelper.Principal!);
+                res.CanWriteReview = _reviewsHelper.CanUserWriteReview(doctorId);
             }
 
             return ServiceResult<DoctorDataDto>.Success(res);

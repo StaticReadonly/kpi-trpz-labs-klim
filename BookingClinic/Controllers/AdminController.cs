@@ -1,6 +1,5 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Admin;
-using BookingClinic.Application.Data.User;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.Visitor;
 using Microsoft.AspNetCore.Authorization;
@@ -79,11 +78,11 @@ namespace BookingClinic.Controllers
         }
 
         [HttpGet("users/edit/{id:guid}")]
-        public async Task<IActionResult> EditUser([FromRoute] Guid id)
+        public IActionResult EditUser([FromRoute] Guid id)
         {
             ViewData["Clinics"] = _adminService.GetAllClinics();
             ViewData["Specialities"] = _adminService.GetAllSpecialities();
-            var res = await _adminService.GetUserById(id);
+            var res = _adminService.GetUserById(id);
 
             if (!res.IsSuccess)
             {

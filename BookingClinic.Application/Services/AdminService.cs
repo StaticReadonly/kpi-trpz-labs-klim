@@ -27,7 +27,7 @@ namespace BookingClinic.Application.Services
             return users.Adapt<IEnumerable<UserAdminDto>>();
         }
 
-        public async Task<ServiceResult<UserAdminDto>> GetUserById(Guid id)
+        public ServiceResult<UserAdminDto> GetUserById(Guid id)
         {
             try
             {

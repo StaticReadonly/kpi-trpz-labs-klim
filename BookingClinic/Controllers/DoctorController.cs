@@ -85,7 +85,7 @@ namespace BookingClinic.Controllers
                 TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
                 return RedirectToAction("Profile", new { id = dto.DoctorId });
             }
-            return RedirectToAction("Index", "User");
+            return RedirectToAction("Index", "Appointment");
         }
 
         [HttpPost("docApp")]

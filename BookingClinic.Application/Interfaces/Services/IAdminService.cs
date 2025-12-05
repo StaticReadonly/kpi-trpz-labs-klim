@@ -1,14 +1,12 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Admin;
-using BookingClinic.Application.Data.User;
-using System.Security.Claims;
 
 namespace BookingClinic.Application.Interfaces.Services
 {
     public interface IAdminService
     {
         IEnumerable<UserAdminDto> GetAllUsers();
-        Task<ServiceResult<UserAdminDto>> GetUserById(Guid id);
+        ServiceResult<UserAdminDto> GetUserById(Guid id);
         Task<ServiceResult> UpdateUser(UserAdminDto user);
         Task<ServiceResult> DeleteUser(Guid id);
         Task<ServiceResult> RegisterUser(UserAdminDto dto);

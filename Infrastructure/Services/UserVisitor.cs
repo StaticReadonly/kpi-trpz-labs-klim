@@ -5,7 +5,7 @@ using QuestPDF.Helpers;
 
 namespace BookingClinic.Infrastructure.Services
 {
-    public class UserVisitor : IUserVisitor, IDisposable
+    public class UserVisitor : IUserVisitor
     {
         private readonly string _fileName;
         private readonly List<string> _lines = new();

@@ -205,9 +205,9 @@ namespace BookingClinic.Application.Services
                 return ServiceResult.Failure(ServiceError.UserNotFound());
             }
 
-            userEntity.ProfilePicture = newName;
-
             var transaction = await _unitOfWork.BeginTransactionAsync();
+
+            userEntity.ProfilePicture = newName;
             _unitOfWork.Users.UpdateEntity(userEntity);
 
             try
