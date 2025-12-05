@@ -102,7 +102,7 @@
             else
             {
                 <p>
-                    <strong>Rating:</strong> @Model.Rating
+                    <strong>Rating:</strong> @Model.Rating.ToString("F1")
                     <a asp-controller="Review" asp-action="Index" asp-route-id="@Model.Id" class="ms-2">
                         Check reviews
                     </a>

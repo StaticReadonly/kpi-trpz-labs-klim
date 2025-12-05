@@ -5,7 +5,7 @@ namespace BookingClinic.Application.Common
     public class SearchDoctorIndexResult
     {
         public bool IsSuccess { get; init; }
-        public ICollection<ServiceError>? Errors { get; init; }
+        public ICollection<ServiceError> Errors { get; init; }
         public IEnumerable<SearchDoctorResDto> Doctors { get; init; }
         public List<int> Pages { get; init; } = new();
         public int Page { get; init; }

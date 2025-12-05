@@ -52,7 +52,8 @@
 
         // ======= Review Entity Errors =============
 
-
+        public static ServiceError ReviewNotFound() =>
+            new(ServiceErrorCodes.ReviewNotFound, "Review not found!"); 
 
         // ======= Appointment Entity Errors =============
 

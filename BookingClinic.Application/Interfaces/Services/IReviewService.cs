@@ -7,5 +7,7 @@ namespace BookingClinic.Application.Interfaces.Services
     {
         ServiceResult<DoctorReviewsDto> GetDoctorReviews(Guid doctorId);
         Task<ServiceResult> CreateReview(AddReviewDto dto);
+
+        Task<ServiceResult> DeleteReview(DeleteReviewDto dto);
     }
 }

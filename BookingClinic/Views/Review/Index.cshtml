@@ -1,7 +1,10 @@
 ﻿@using BookingClinic.Application.Data.Review
-@model DoctorReviewsDto;
+@model DoctorReviewsDto
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject BookingClinic.Application.Interfaces.Helpers.IUserContextHelper UserContextHelper
 @{
     ViewData["Title"] = "Doctor Reviews";
+    Guid.TryParse(ViewContext.RouteData.Values["id"]?.ToString(), out Guid doctorId);
 }
 
 <div class="container mt-4">
@@ -14,7 +17,7 @@
             </div>
         </div>
         <div class="text-end">
-            <div class="fs-5"><strong>Rating:</strong> @Model.Rating</div>
+            <div class="fs-5"><strong>Rating:</strong> @Model.Rating.ToString("F1")</div>
             <div class="fs-6 text-secondary">Total: @Model.Reviews.Count()</div>
         </div>
     </div>
@@ -35,6 +38,35 @@
                         <div class="border-top pt-2 mt-2 text-break" style="min-height: 60px;">
                             @rev.Text
                         </div>
+
+                        @if (UserContextHelper.IsAuthenticated && UserContextHelper.UserId.HasValue && rev.PatientId == UserContextHelper.UserId.Value)
+                        {
+                            <div class="mt-3 text-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@rev.Id">Delete</button>
+                            </div>
+
+                            <div class="modal fade" id="deleteModal-@rev.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@rev.Id" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel-@rev.Id">Confirm</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete review?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form method="post" asp-controller="Review" asp-action="DeleteReview" class="m-0">
+                                                <input type="hidden" name="DoctorId" value="@doctorId" />
+                                                <input type="hidden" name="ReviewId" value="@rev.Id" />
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

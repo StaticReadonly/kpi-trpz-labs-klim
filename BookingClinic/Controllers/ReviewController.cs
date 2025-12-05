@@ -63,5 +63,22 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
             }
         }
+
+        [HttpPost("reviewDelete")]
+        [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
+        public async Task<IActionResult> DeleteReview([FromForm] DeleteReviewDto dto)
+        {
+            var res = await _reviewService.DeleteReview(dto);
+
+            if (res.IsSuccess)
+            {
+                return RedirectToAction("Index", new {id = dto.DoctorId});
+            }
+            else
+            {
+                _viewMessageHelper.SetErrors(res.Errors, TempData);
+                return RedirectToAction("Index", new {id = dto.DoctorId});
+            }
+        }
     }
 }

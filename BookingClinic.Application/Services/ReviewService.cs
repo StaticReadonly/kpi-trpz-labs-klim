@@ -53,6 +53,39 @@ namespace BookingClinic.Application.Services
             }
         }
 
+        public async Task<ServiceResult> DeleteReview(DeleteReviewDto dto)
+        {
+            var id = _userContextHelper.UserId!.Value;
+
+            if (!_userContextHelper.IsPatient && !_userContextHelper.IsAdmin)
+            {
+                return ServiceResult.Failure(ServiceError.Unauthorized());
+            }
+
+            var review = _unitOfWork.DoctorReviews.GetById(dto.ReviewId);
+
+            if (review == null)
+            {
+                return ServiceResult.Failure(ServiceError.ReviewNotFound());
+            }
+            else if (review.PatientId != id)
+            {
+                return ServiceResult.Failure(ServiceError.Unauthorized());
+            }
+
+            _unitOfWork.DoctorReviews.DeleteEntity(review);
+
+            try
+            {
+                await _unitOfWork.SaveChangesAsync();
+                return ServiceResult.Success();
+            }
+            catch (Exception)
+            {
+                return ServiceResult.Failure(ServiceError.UnexpectedError());
+            }
+        }
+
         public ServiceResult<DoctorReviewsDto> GetDoctorReviews(Guid doctorId)
         {
             var doctor = _unitOfWork.Users.GetById(doctorId);
