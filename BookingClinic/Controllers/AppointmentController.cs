@@ -87,6 +87,11 @@ namespace BookingClinic.Controllers
         [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
         public IActionResult FinishedAppointment([FromQuery] Guid patientId)
         {
+            if (TempData["Errors"] != null)
+            {
+                ViewData["Errors"] = JsonSerializer.Deserialize<List<ServiceError>>(TempData["Errors"].ToString());
+            }
+
             var docId = _userContextHelper.UserId!.Value;
             var res = _doctorService.GetDoctorData(docId);
 
@@ -149,7 +154,7 @@ namespace BookingClinic.Controllers
             else
             {
                 TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
-                return RedirectToAction("Index");
+                return RedirectToAction("FinishedAppointment", new { patientId = dto.PatientId });
             }
         }
 

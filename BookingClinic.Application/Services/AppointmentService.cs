@@ -98,8 +98,9 @@ namespace BookingClinic.Application.Services
             dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
 
             var app = _unitOfWork.Appointments.GetByDateTime(dateTime);
+            var hasAppointment = _unitOfWork.Appointments.GetAll().Any(a => a.PatientId == dto.PatientId && a.DateTime.Date == dateTime.Date);
 
-            if (app != null)
+            if (app != null || hasAppointment)
             {
                 return ServiceResult.Failure(ServiceError.AppointmentAlreadyExists());
             }
