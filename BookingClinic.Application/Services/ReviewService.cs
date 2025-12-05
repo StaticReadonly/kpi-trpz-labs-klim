@@ -1,5 +1,6 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Review;
+using BookingClinic.Application.Interfaces.Factories;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
@@ -12,13 +13,16 @@ namespace BookingClinic.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextHelper _userContextHelper;
+        private readonly IReviewFactory _reviewFactory;
 
         public ReviewService(
             IUnitOfWork unitOfWork,
-            IUserContextHelper userContextHelper)
+            IUserContextHelper userContextHelper,
+            IReviewFactory reviewFactory)
         {
             this._unitOfWork = unitOfWork;
             this._userContextHelper = userContextHelper;
+            this._reviewFactory = reviewFactory;
         }
 
         public async Task<ServiceResult> CreateReview(AddReviewDto dto)
@@ -30,19 +34,11 @@ namespace BookingClinic.Application.Services
                 return ServiceResult.Failure(ServiceError.Unauthorized());
             }
 
-            DoctorReview rev = new()
-            {
-                Id = Guid.NewGuid(),
-                DoctorId = dto.DoctorId,
-                PatientId = id,
-                Rating = dto.Rating,
-                Text = dto.Text
-            };
-
-            _unitOfWork.DoctorReviews.AddEntity(rev);
-
             try
             {
+                var rev = _reviewFactory.CreateReview(dto, id);
+                _unitOfWork.DoctorReviews.AddEntity(rev);
+
                 await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult.Success();

@@ -1,7 +1,9 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Data.User;
+using BookingClinic.Application.Exceptions;
 using BookingClinic.Application.Interfaces;
+using BookingClinic.Application.Interfaces.Factories;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
@@ -17,20 +19,23 @@ namespace BookingClinic.Application.Services
         private readonly IFileStorage _fileStorage;
         private readonly IUserContextHelper _userContextHelper;
         private readonly IPasswordHelper _passwordHelper;
+        private readonly IUserFactory _userFactory;
 
         public UserService(
             IUnitOfWork unitOfWork,
             IFileStorage fileStorage,
             IUserContextHelper userContextHelper,
-            IPasswordHelper passwordHelper)
+            IPasswordHelper passwordHelper,
+            IUserFactory userFactory)
         {
             this._passwordHelper = passwordHelper;
             this._unitOfWork = unitOfWork;
             this._fileStorage = fileStorage;
             this._userContextHelper = userContextHelper;
+            this._userFactory = userFactory;
         }
 
-        private ClaimsPrincipal CreateClaimsPrincipal(UserBase user)
+        private static ClaimsPrincipal CreateClaimsPrincipal(UserBase user)
         {
             var claims = new Claim[]
             {
@@ -144,17 +149,7 @@ namespace BookingClinic.Application.Services
                     return ServiceResult<ClaimsPrincipal>.Failure(ServiceError.UserAlreadyExists());
                 }
 
-                Patient newUser = new()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.Name,
-                    Surname = dto.Surname,
-                    Email = dto.Email
-                };
-
-                var passwordHash = _passwordHelper.GetPasswordHash(newUser, dto?.Password ?? string.Empty);
-                newUser.PasswordHash = passwordHash;
-
+                var newUser = _userFactory.CreateUser(dto!);
                 _unitOfWork.Users.AddEntity(newUser);
                 
                 await _unitOfWork.SaveChangesAsync();
@@ -189,14 +184,14 @@ namespace BookingClinic.Application.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateUserPhoto(UserPictureDto userPicture)
+        public async Task<ServiceResult> UpdateUserPhoto(UserPictureDto file)
         {
             var id = _userContextHelper.UserId!.Value;
 
-            var name = userPicture.FileName;
+            var name = file.FileName;
             var idx = name.LastIndexOf('.');
             var newName = Guid.NewGuid().ToString() + name.Substring(idx);
-            userPicture.FileName = newName;
+            file.FileName = newName;
 
             var userEntity = _unitOfWork.Users.GetById(id);
 
@@ -213,7 +208,7 @@ namespace BookingClinic.Application.Services
             try
             {
                 await _unitOfWork.SaveChangesAsync();
-                await _fileStorage.SaveUserPhotoAsync(userPicture, id);
+                await _fileStorage.SaveUserPhotoAsync(file, id);
 
                 await transaction.CommitAsync();
                 return ServiceResult.Success();
@@ -241,25 +236,25 @@ namespace BookingClinic.Application.Services
             {
                 return ServiceResult<UserPageDataDto>.Failure(ServiceError.InvalidEmailOrPassword());
             }
-
-            user.Name = dto.Name;
-            user.Surname = dto.Surname;
-            user.Email = dto.Email;
-            user.Phone = dto.Phone;
-            user.PasswordHash = _passwordHelper.GetPasswordHash(user, dto.Password);
-
-            _unitOfWork.Users.UpdateEntity(user);
-
+            
             try
             {
+                user.Name = dto.Name;
+                user.Surname = dto.Surname;
+                user.Email = dto.Email;
+                user.Phone = dto.Phone;
+                user.PasswordHash = _passwordHelper.GetPasswordHash(user, dto.Password);
+
+                _unitOfWork.Users.UpdateEntity(user);
+
                 await _unitOfWork.SaveChangesAsync();
                 return ServiceResult<UserPageDataDto>.Success(user.Adapt<UserPageDataDto>());
             }
-            //catch (DbUpdateException)
-            //{
-            //    return ServiceResult<UserPageDataDto>.Failure(
-            //        new List<ServiceError>() { ServiceError.UserAlreadyExists() });
-            //}
+            catch (DatabaseOperationException exc)
+            {
+                return ServiceResult<UserPageDataDto>.Failure(
+                    new List<ServiceError>() { ServiceError.UserAlreadyExists() });
+            }
             catch (Exception)
             {
                 return ServiceResult<UserPageDataDto>.Failure(ServiceError.UnexpectedError());

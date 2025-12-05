@@ -1,6 +1,8 @@
 ﻿using BookingClinic.Domain.Interfaces.Repositories;
 using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Infrastructure.AppContext;
+using Microsoft.EntityFrameworkCore;
+using BookingClinic.Application.Exceptions;
 
 namespace BookingClinic.Infrastructure.UnitOfWork
 {
@@ -40,6 +42,16 @@ namespace BookingClinic.Infrastructure.UnitOfWork
             return new DbTransaction(await _context.Database.BeginTransactionAsync());
         }
 
-        public Task<int> SaveChangesAsync() => _context.SaveChangesAsync();
+        public async Task<int> SaveChangesAsync() 
+        {
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch(DbUpdateException exc)
+            {
+                throw new DatabaseOperationException(exc.Message, exc);
+            }
+        }
     }
 }

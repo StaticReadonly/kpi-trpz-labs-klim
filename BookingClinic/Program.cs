@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace BookingClinic
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -27,6 +27,7 @@ namespace BookingClinic
             services.AddAppHelpers();
             services.AddAppOptions();
             services.AddAppUnitOfWork();
+            services.AddFactories();
 
             services.AddHttpContextAccessor();
             services.AddAuthentication()

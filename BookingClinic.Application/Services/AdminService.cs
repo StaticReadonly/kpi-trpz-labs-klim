@@ -1,5 +1,6 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Admin;
+using BookingClinic.Application.Interfaces.Factories;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
@@ -12,13 +13,22 @@ namespace BookingClinic.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHelper _passwordHelper;
+        private readonly IUserFactory _userFactory;
+        private readonly ISpecialityFactory _specialityFactory;
+        private readonly IClinicFactory _clinicFactory;
 
         public AdminService(
             IUnitOfWork unitOfWork,
-            IPasswordHelper passwordHelper)
+            IPasswordHelper passwordHelper,
+            IUserFactory userFactory,
+            ISpecialityFactory specialityFactory,
+            IClinicFactory clinicFactory)
         {
             this._unitOfWork = unitOfWork;
             this._passwordHelper = passwordHelper;
+            this._userFactory = userFactory;
+            this._specialityFactory = specialityFactory;
+            this._clinicFactory = clinicFactory;
         }
 
         public IEnumerable<UserAdminDto> GetAllUsers()
@@ -119,42 +129,11 @@ namespace BookingClinic.Application.Services
                 return ServiceResult.Failure(ServiceError.UserAlreadyExists());
             }
 
-            UserBase newUser;
-
-            if (string.Equals(dto.Role, "Doctor", StringComparison.OrdinalIgnoreCase))
-            {
-                newUser = new Doctor
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.Name,
-                    Surname = dto.Surname,
-                    Email = dto.Email,
-                    Phone = dto.Phone,
-                    Role = dto.Role,
-                    ClinicId = dto.ClinicId ?? Guid.Empty,
-                    SpecialityId = dto.SpecialityId ?? Guid.Empty
-                };
-            }
-            else
-            {
-                newUser = new UserBase
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.Name,
-                    Surname = dto.Surname,
-                    Email = dto.Email,
-                    Phone = dto.Phone,
-                    Role = dto.Role
-                };
-            }
-
-            var passwordHash = _passwordHelper.GetPasswordHash(newUser, dto.Password);
-            newUser.PasswordHash = passwordHash;
-
-            _unitOfWork.Users.AddEntity(newUser);
-
             try
             {
+                var newUser = _userFactory.CreateUser(dto);
+                _unitOfWork.Users.AddEntity(newUser);
+
                 await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult.Success();
@@ -175,16 +154,8 @@ namespace BookingClinic.Application.Services
         {
             try
             {
-                var clinic = new Clinic
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.Name,
-                    City = dto.City,
-                    Street = dto.Street,
-                    Building = dto.Building,
-                    CreatedDate = DateTime.UtcNow
-                };
-
+                var clinic = _clinicFactory.CreateClinic(dto);
+                
                 _unitOfWork.Clinics.AddEntity(clinic);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -252,11 +223,7 @@ namespace BookingClinic.Application.Services
         {
             try
             {
-                var s = new Speciality
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.Name
-                };
+                var s = _specialityFactory.CreateSpeciality(dto);
 
                 _unitOfWork.Specialities.AddEntity(s);
                 await _unitOfWork.SaveChangesAsync();

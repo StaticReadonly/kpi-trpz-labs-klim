@@ -1,6 +1,7 @@
 ﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Appointment;
 using BookingClinic.Application.Data.Doctor;
+using BookingClinic.Application.Interfaces.Factories;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using BookingClinic.Application.Interfaces.UnitOfWork;
@@ -13,13 +14,27 @@ namespace BookingClinic.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextHelper _userContextHelper;
+        private readonly IAppointmentFactory _appointmentFactory;
 
         public AppointmentService(
             IUnitOfWork unitOfWork,
-            IUserContextHelper userContextHelper)
+            IUserContextHelper userContextHelper,
+            IAppointmentFactory appointmentFactory)
         {
             this._unitOfWork = unitOfWork;
             this._userContextHelper = userContextHelper;
+            this._appointmentFactory = appointmentFactory;
+        }
+
+        private static DateTime GetAppointmentDateTime(string appointmentDay, string appointmentTime)
+        {
+            var times = appointmentTime.Split('-');
+            var hoursMinutes = times[0].Split(':');
+            var hours = int.Parse(hoursMinutes[0]);
+            var minutes = int.Parse(hoursMinutes[1]);
+            DateTime dateTime = DateTime.ParseExact(appointmentDay.Split(',')[1].Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
+            dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
+            return dateTime;
         }
 
         public async Task<ServiceResult> CreateAppointment(MakeAppointmentDto dto)
@@ -33,13 +48,7 @@ namespace BookingClinic.Application.Services
             }
 
             var clinic = doctor.Clinic;
-
-            var times = dto.AppointmentTime.Split('-');
-            var hoursMinutes = times[0].Split(':');
-            var hours = int.Parse(hoursMinutes[0]);
-            var minutes = int.Parse(hoursMinutes[1]);
-            DateTime dateTime = DateTime.ParseExact(dto.AppointmentDay.Split(',')[1].Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
-            dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
+            var dateTime = GetAppointmentDateTime(dto.AppointmentDay, dto.AppointmentTime);
 
             var app = _unitOfWork.Appointments.GetByDateTime(dateTime);
             var hasAppointment = _unitOfWork.Appointments.GetAll().Any(a => a.PatientId == id && a.DateTime.Date == dateTime.Date);
@@ -49,20 +58,11 @@ namespace BookingClinic.Application.Services
                 return ServiceResult.Failure(ServiceError.AppointmentAlreadyExists());
             }
 
-            var appointment = new Domain.Entities.Appointment()
-            {
-                Id = Guid.NewGuid(),
-                PatientId = id,
-                DoctorId = dto.DoctorId,
-                CreatedAt = DateTime.UtcNow,
-                DateTime = dateTime,
-                Address = $"{clinic.Name}, {clinic.City} {clinic.Street} {clinic.Building}"
-            };
-
-            _unitOfWork.Appointments.AddEntity(appointment);
-
             try
             {
+                var appointment = _appointmentFactory.CreateAppointment(dto, clinic, dateTime, id);
+                _unitOfWork.Appointments.AddEntity(appointment);
+
                 await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult.Success();
@@ -89,13 +89,7 @@ namespace BookingClinic.Application.Services
             }
 
             var clinic = doctor.Clinic;
-
-            var times = dto.AppointmentTime.Split('-');
-            var hoursMinutes = times[0].Split(':');
-            var hours = int.Parse(hoursMinutes[0]);
-            var minutes = int.Parse(hoursMinutes[1]);
-            DateTime dateTime = DateTime.ParseExact(dto.AppointmentDay.Split(',')[1].Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
-            dateTime = DateTime.SpecifyKind(dateTime.AddHours(hours).AddMinutes(minutes), DateTimeKind.Utc);
+            var dateTime = GetAppointmentDateTime(dto.AppointmentDay, dto.AppointmentTime);
 
             var app = _unitOfWork.Appointments.GetByDateTime(dateTime);
             var hasAppointment = _unitOfWork.Appointments.GetAll().Any(a => a.PatientId == dto.PatientId && a.DateTime.Date == dateTime.Date);
@@ -105,20 +99,11 @@ namespace BookingClinic.Application.Services
                 return ServiceResult.Failure(ServiceError.AppointmentAlreadyExists());
             }
 
-            var appointment = new Domain.Entities.Appointment()
-            {
-                Id = Guid.NewGuid(),
-                PatientId = dto.PatientId,
-                DoctorId = id,
-                CreatedAt = DateTime.UtcNow,
-                DateTime = dateTime,
-                Address = $"{clinic.Name}, {clinic.City} {clinic.Street} {clinic.Building}"
-            };
-
-            _unitOfWork.Appointments.AddEntity(appointment);
-
             try
             {
+                var appointment = _appointmentFactory.CreateAppointment(dto, clinic, dateTime, id);
+                _unitOfWork.Appointments.AddEntity(appointment);
+
                 await _unitOfWork.SaveChangesAsync();
 
                 return ServiceResult.Success();
