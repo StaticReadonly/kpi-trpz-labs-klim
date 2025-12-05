@@ -6,7 +6,7 @@
     var patientId = Model.PatientId;
 }
 
-<form id="appointmentForm" method="post" asp-controller="Doctor" asp-action="MakeAppointmentDoctor" class="d-none">
+<form id="appointmentForm" method="post" asp-controller="Appointment" asp-action="MakeAppointmentDoctor" class="d-none">
     <input type="hidden" name="patientId" id="patientIdInput" />
     <input type="hidden" name="appointmentDay" id="appointmentDayInput" />
     <input type="hidden" name="appointmentTime" id="appointmentTimeInput" />

@@ -3,7 +3,6 @@ using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Interfaces.Services;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -13,16 +12,13 @@ namespace BookingClinic.Controllers
     public class DoctorController : Controller
     {
         private readonly IDoctorService _doctorService;
-        private readonly IAppointmentService _appointmentService;
         private readonly ISearchDoctorFacade _searchDoctorFacade;
 
         public DoctorController(
             IDoctorService doctorService,
-            IAppointmentService appointmentService,
             ISearchDoctorFacade searchDoctorFacade)
         {
             _doctorService = doctorService;
-            _appointmentService = appointmentService;
             _searchDoctorFacade = searchDoctorFacade;
         }
 
@@ -69,24 +65,6 @@ namespace BookingClinic.Controllers
             {
                 ViewData["Errors"] = res.Errors;
                 return View();
-            }
-        }
-
-        [HttpPost("docApp")]
-        [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
-        public async Task<IActionResult> MakeAppointmentDoctor(
-            [FromForm] MakeAppointmentDocDto dto)
-        {
-            var res = await _appointmentService.CreateAppointmentDoctor(dto);
-
-            if (res.IsSuccess)
-            {
-                return RedirectToAction("FinishedAppointment", "Appointment", new { dto.PatientId });
-            }
-            else
-            {
-                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
-                return RedirectToAction("Index", "Appointment");
             }
         }
     }

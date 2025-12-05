@@ -1,7 +1,8 @@
-﻿using BookingClinic.Application.Interfaces.Services;
-using BookingClinic.Application.Interfaces.Helpers;
+﻿using BookingClinic.Application.Common;
 using BookingClinic.Application.Data.Appointment;
-using BookingClinic.Application.Common;
+using BookingClinic.Application.Data.Doctor;
+using BookingClinic.Application.Interfaces.Helpers;
+using BookingClinic.Application.Interfaces.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +18,20 @@ namespace BookingClinic.Controllers
         private readonly IPaginationHelper<PatientAppointmentDto> _patientPaginationHelper;
         private readonly IPaginationHelper<DoctorAppointmentDto> _doctorAppointmentHelper;
         private readonly IDoctorService _doctorService;
+        private readonly IUserContextHelper _userContextHelper;
 
         public AppointmentController(
             IAppointmentService appointmentService,
             IPaginationHelper<PatientAppointmentDto> patientPaginationHelper,
             IPaginationHelper<DoctorAppointmentDto> doctorAppointmentHelper,
-            IDoctorService doctorService)
+            IDoctorService doctorService,
+            IUserContextHelper userContextHelper)
         {
             _appointmentService = appointmentService;
             _patientPaginationHelper = patientPaginationHelper;
             _doctorAppointmentHelper = doctorAppointmentHelper;
             _doctorService = doctorService;
+            _userContextHelper = userContextHelper;
         }
 
         [HttpGet]
@@ -83,9 +87,8 @@ namespace BookingClinic.Controllers
         [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
         public IActionResult FinishedAppointment([FromQuery] Guid patientId)
         {
-            var docId = User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value;
-
-            var res = _doctorService.GetDoctorData(Guid.Parse(docId));
+            var docId = _userContextHelper.UserId!.Value;
+            var res = _doctorService.GetDoctorData(docId);
 
             if (res.IsSuccess)
             {
@@ -130,6 +133,24 @@ namespace BookingClinic.Controllers
                 return RedirectToAction("Profile", "Doctor", new { id = dto.DoctorId });
             }
             return RedirectToAction("Index", "Appointment");
+        }
+
+        [HttpPost("docApp")]
+        [Authorize(AuthorizationPolicies.DoctorOnlyPolicy)]
+        public async Task<IActionResult> MakeAppointmentDoctor(
+            [FromForm] MakeAppointmentDocDto dto)
+        {
+            var res = await _appointmentService.CreateAppointmentDoctor(dto);
+
+            if (res.IsSuccess)
+            {
+                return RedirectToAction("FinishedAppointment", new { dto.PatientId });
+            }
+            else
+            {
+                TempData["Errors"] = JsonSerializer.Serialize(res.Errors);
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost("cancel")]
