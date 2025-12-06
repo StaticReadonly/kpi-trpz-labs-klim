@@ -158,7 +158,7 @@ namespace BookingClinic.Controllers
         [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> ProfilePicture([FromForm] IFormFile image)
         {
-            if (image.Length == 0)
+            if (image == null || image.Length == 0)
             {
                 _viewMessageHelper.SetErrors(new List<ServiceError>() { ServiceError.MustProvideImage() }, TempData);
                 return RedirectToAction("Index");
