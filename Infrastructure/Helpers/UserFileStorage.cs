@@ -26,7 +26,7 @@ namespace BookingClinic.Infrastructure.Helpers
             var path = Path.Combine(dir, file.FileName);
 
             using var newFile = File.Create(path);
-            await file.FileStream.CopyToAsync(newFile);
+            await file.FileStream!.CopyToAsync(newFile);
         }
     }
 }

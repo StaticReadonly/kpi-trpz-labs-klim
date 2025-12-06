@@ -34,6 +34,9 @@
         public static ServiceError DoctorNotFound() =>
             new(ServiceErrorCodes.DoctorNotFound, "Doctor not found!");
 
+        public static ServiceError MustProvideImage() =>
+            new(ServiceErrorCodes.MustProvideImage, "Must provide an image file!");
+
         // ======= Clinic Entity Errors =============
 
         public static ServiceError ClinicNotFound() =>

@@ -1,4 +1,5 @@
-﻿using BookingClinic.Application.Data.User;
+﻿using BookingClinic.Application.Common;
+using BookingClinic.Application.Data.User;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
 using FluentValidation;
@@ -7,6 +8,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BookingClinic.Controllers
 {
@@ -156,8 +158,13 @@ namespace BookingClinic.Controllers
         [Authorize(AuthorizationPolicies.AuthorizedUserOnlyPolicy)]
         public async Task<IActionResult> ProfilePicture([FromForm] IFormFile image)
         {
-            using var stream = image.OpenReadStream();
-            var newImageModel = new UserPictureDto(image.FileName, stream);
+            if (image.Length == 0)
+            {
+                _viewMessageHelper.SetErrors(new List<ServiceError>() { ServiceError.MustProvideImage() }, TempData);
+                return RedirectToAction("Index");
+            }
+
+            using var newImageModel = new UserPictureDto(image.FileName, image.OpenReadStream());
             var res = await _userService.UpdateUserPhoto(newImageModel);
 
             if (res.IsSuccess)
