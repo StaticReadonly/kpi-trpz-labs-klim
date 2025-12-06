@@ -1,6 +1,6 @@
 ﻿using BookingClinic.Application.Helpers;
 
-namespace BookingClinic.Infrastructure.Options
+namespace BookingClinic.Application.Options
 {
     public class DoctorSortingOptions
     {

@@ -3,7 +3,7 @@ using BookingClinic.Domain.Entities;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BookingClinic.Infrastructure.Helpers
+namespace BookingClinic.Application.Helpers
 {
     public class PasswordHelper : IPasswordHelper
     {

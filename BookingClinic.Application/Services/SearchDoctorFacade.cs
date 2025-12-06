@@ -3,10 +3,10 @@ using BookingClinic.Application.Data.Doctor;
 using BookingClinic.Application.Helpers;
 using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.Services;
-using BookingClinic.Infrastructure.Options;
+using BookingClinic.Application.Options;
 using Microsoft.Extensions.Options;
 
-namespace BookingClinic.Infrastructure.Services
+namespace BookingClinic.Application.Services
 {
     public class SearchDoctorFacade : ISearchDoctorFacade
     {

@@ -1,6 +1,6 @@
 ﻿using BookingClinic.Application.Helpers;
-using BookingClinic.Infrastructure.Helpers.DoctorSorterHelper;
-using BookingClinic.Infrastructure.Options;
+using BookingClinic.Application.Helpers.DoctorSorterHelper;
+using BookingClinic.Application.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookingClinic.Infrastructure.Extensions

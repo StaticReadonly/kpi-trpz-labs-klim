@@ -1,7 +1,6 @@
 ﻿using BookingClinic.Application.Data.Doctor;
-using BookingClinic.Application.Helpers;
 
-namespace BookingClinic.Infrastructure.Helpers.DoctorSorterHelper
+namespace BookingClinic.Application.Helpers.DoctorSorterHelper
 {
     public class NoStrategy : IDoctorSorterStrategy
     {

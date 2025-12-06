@@ -3,7 +3,7 @@ using BookingClinic.Application.Interfaces.UnitOfWork;
 using BookingClinic.Application.Interfaces.Visitor;
 using Mapster;
 
-namespace BookingClinic.Infrastructure.Services
+namespace BookingClinic.Application.Services
 {
     public class UserExportService : IUserExportService
     {

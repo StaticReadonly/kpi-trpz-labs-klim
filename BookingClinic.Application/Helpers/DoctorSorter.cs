@@ -1,11 +1,10 @@
 ﻿using BookingClinic.Application.Data.Doctor;
-using BookingClinic.Application.Helpers;
+using BookingClinic.Application.Helpers.DoctorSorterHelper;
 using BookingClinic.Application.Interfaces.Helpers;
-using BookingClinic.Infrastructure.Helpers.DoctorSorterHelper;
-using BookingClinic.Infrastructure.Options;
+using BookingClinic.Application.Options;
 using Microsoft.Extensions.Options;
 
-namespace BookingClinic.Infrastructure.Helpers
+namespace BookingClinic.Application.Helpers
 {
     public class DoctorSorter : IDoctorSorter
     {

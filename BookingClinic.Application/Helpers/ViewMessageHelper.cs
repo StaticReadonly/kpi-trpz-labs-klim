@@ -2,7 +2,7 @@
 using BookingClinic.Application.Interfaces.Helpers;
 using System.Text.Json;
 
-namespace BookingClinic.Infrastructure.Helpers
+namespace BookingClinic.Application.Helpers
 {
     public class ViewMessageHelper : IViewMessageHelper
     {

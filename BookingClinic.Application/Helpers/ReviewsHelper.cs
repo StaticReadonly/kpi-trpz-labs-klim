@@ -1,7 +1,7 @@
 ﻿using BookingClinic.Application.Interfaces.Helpers;
 using BookingClinic.Application.Interfaces.UnitOfWork;
 
-namespace BookingClinic.Infrastructure.Helpers
+namespace BookingClinic.Application.Helpers
 {
     public class ReviewsHelper : IReviewsHelper
     {

@@ -7,7 +7,6 @@ using FluentValidation;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using QuestPDF.Infrastructure;
-using System.Reflection;
 
 namespace BookingClinic.Infrastructure.Extensions
 {
